@@ -3,9 +3,11 @@ import Sidebar from "../Layout/Sidebar";
 
 export default function MainLayout() {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="bg-[#F9FAFB] min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-8">
+      
+      {/* Push content right */}
+      <main className="ml-65 pl-5.5 pt-24 pr-14">
         <Outlet />
       </main>
     </div>

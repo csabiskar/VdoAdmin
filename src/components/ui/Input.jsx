@@ -1,11 +1,30 @@
-export default function Input({ label, ...props }) {
+// export default function Input({ label, ...props }) {
+//   return (
+//     <div className={`space-y-2 ${label==="Product Price"?"-mt-4":""} ${label==="Stock Quantity"?"-mt-4":""} ${label==="Stock Keeping Unit (SKU)"?"-mt-4":""} ${label==="Discounted Price (Optional)"?"-mt-4":""}`}>
+//       {label && (
+//         <label className={`text-[15px] text-[#023337] font-normal `}>{label}</label>
+//       )}
+//       <input
+//         className={`w-full border rounded-lg px-2 border-[#E5E7EB] bg-[#F9FAFB] h-12 focus:outline-none focus:border-[#00B207] transition outline-none placeholder:text-black placeholder:text-sm placeholder:font-light mt-2.5`}
+//         {...props}
+//         type={`${label==="Product Price"?"number":"text"} ${label==="Stock Quantity"?"number":"text"}`}
+//       />
+//     </div>
+//   );
+// }
+
+export default function Input({ label, className = "", type = "text", ...props }) {
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="text-sm text-gray-600">{label}</label>
+        <label className="text-[15px] text-[#023337] font-normal">
+          {label}
+        </label>
       )}
+
       <input
-        className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none"
+        type={type}
+        className="w-full border rounded-lg px-3 border-[#E5E7EB] bg-[#F9FAFB] h-12 focus:outline-none focus:border-[#00B207] transition placeholder:text-black placeholder:text-sm placeholder:font-light mt-2.5"
         {...props}
       />
     </div>
