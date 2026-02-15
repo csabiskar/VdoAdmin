@@ -1,4 +1,4 @@
-export default function Button({ children, variant = "primary" }) {
+export default function Button({ children, variant = "primary",type="" }) {
   const base = "p-3 rounded-lg font-medium transition cursor-pointer";
 
   const styles = {
@@ -6,5 +6,5 @@ export default function Button({ children, variant = "primary" }) {
     outline: "border border-[#00B207] text-[15px] text-green-600 hover:bg-green-50",
   };
 
-  return <button className={`${base} ${styles[variant]}`}>{children}</button>;
+  return <button className={`${base} ${styles[variant]}`} type={type}>{children}</button>;
 }

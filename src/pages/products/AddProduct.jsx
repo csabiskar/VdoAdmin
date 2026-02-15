@@ -18,10 +18,19 @@ import {
   Inject,
 } from "@syncfusion/ej2-react-richtexteditor";
 import { useState, useRef, useEffect } from "react";
+import { useProducts } from "../../context/ProductContext";
+import { useForm } from "react-hook-form";
 
 // RichTextEditor.Inject(Toolbar, Link, Image, HtmlEditor, QuickToolbar);
 
-const data = ["Noodles", "Sevai", "Ladduuu", "Healthy Snacks","Maavuuurandi","oil"];
+const data = [
+  "Noodles",
+  "Sevai",
+  "Ladduuu",
+  "Healthy Snacks",
+  "Maavuuurandi",
+  "oil",
+];
 
 export default function AddProduct() {
   const fileInputRef = useRef(null);
@@ -84,9 +93,20 @@ export default function AddProduct() {
     });
   };
 
-  console.log(activeCategory);
+  // console.log(activeCategory);
+  const { loading, addProduct } = useProducts();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit =(data)=>{
+    console.log(data)
+  }
+
   return (
-    <div className="w-full ">
+    <form className="w-full " onSubmit={handleSubmit(onSubmit)}>
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
         <h1 className="text-[22px] font-semibold text-[#023337] ">
@@ -95,7 +115,7 @@ export default function AddProduct() {
 
         <div className="flex gap-6">
           <Button variant="outline">Preview Product</Button>
-          <Button>Publish Product</Button>
+          <Button type="submit">Publish Product</Button>
         </div>
       </div>
 
@@ -106,13 +126,28 @@ export default function AddProduct() {
           <Card title="Basic Details">
             <div className="space-y-6 -mt-2">
               {/* Product Name */}
-              <Input label="Product Name" placeholder="Enter name" />
+              <Input
+                label="Product Name"
+                placeholder="Enter name"
+                {...register("productName", {
+                  required: "Product Name is Required",
+                })}
+              />
+
+              {errors.productName && (
+                <p className="text-red-500 text-sm">
+                  {errors.productName.message}
+                </p>
+              )}
 
               {/* Product Description */}
               <label className="text-[15px] text-[#023337] font-normal">
                 Product Description
               </label>
               <textarea
+                {...register("productDescription", {
+                  required: "Product Description is Required",
+                })}
                 rows={4}
                 className="w-full border border-[#E5E7EB] bg-[#F9FAFB] rounded-lg px-4 py-3 
              focus:outline-none focus:border-[#00B207] 
@@ -120,6 +155,12 @@ export default function AddProduct() {
              placeholder:text-gray-400 placeholder:text-sm mt-2.5"
                 placeholder="Enter Product Description"
               />
+
+              {errors.productDescription && (
+                <p className="text-red-500 text-sm">
+                  {errors.productDescription.message}
+                </p>
+              )}
               {/* Detailed Description */}
               <label className="text-[15px] text-[#023337] font-normal">
                 Detailed Description
@@ -331,6 +372,6 @@ export default function AddProduct() {
           </Card>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
