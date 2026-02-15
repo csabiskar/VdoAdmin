@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, createBrowserRouter } from "react-router-dom";
-import MainLayout from "../components/layout/MainLayout";
+import MainLayout from "../components/Layout/MainLayout";
 import AddProduct from "../pages/products/AddProduct";
 import ProductManager from "../ProductManager";
 import Categories from "../pages/categories/Categories";
