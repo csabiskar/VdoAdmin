@@ -5,6 +5,9 @@ import Img from "../../assets/product.png";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import ModalCard from "../../components/ui/modelcard";
+import EditCategoryStatus from "../../components/ui/Editcategorystatus";
+import DeleteModal from "../../components/ui/Deletemodal";
+
 
 const data = [
   "Noodles",
@@ -114,6 +117,10 @@ function Categories() {
 
   return (
     <>
+    <DeleteModal />
+
+  
+   
       <div className="w-full min-h-screen">
         {/* header */}
         <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
@@ -299,6 +306,7 @@ function Categories() {
             />
           </div>
         </ModalCard>
+        
       )}
     </>
   );
