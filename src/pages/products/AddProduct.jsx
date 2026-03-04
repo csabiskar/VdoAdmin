@@ -7,7 +7,7 @@ import { LuRefreshCw } from "react-icons/lu";
 import { CiCircleRemove } from "react-icons/ci";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaCaretDown } from "react-icons/fa";
-import Quill from 'quill';
+
 
 import {
   RichTextEditorComponent,
@@ -32,7 +32,7 @@ const data = [
   "Maavuuurandi",
   "oil",
 ];
-const quill = new Quill('#editor');
+
 export default function AddProduct() {
   const fileInputRef = useRef(null);
 
@@ -207,10 +207,6 @@ export default function AddProduct() {
                   services={[Toolbar, Link, Image, HtmlEditor, QuickToolbar]}
                 />
               </RichTextEditorComponent>
-
-              <div id="editor">
-
-              </div>
             </div>
           </Card>
           {/* pricing */}
