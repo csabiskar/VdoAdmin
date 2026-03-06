@@ -7,6 +7,8 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import ModalCard from "../../components/ui/modelcard";
 import EditCategoryStatus from "../../components/ui/Editcategorystatus";
 import DeleteModal from "../../components/ui/Deletemodal";
+import editIcon from '../../assets/Dashboradicons/edit.svg'
+import deleteIcon from '../../assets/Dashboradicons/delete.svg'
 
 
 const data = [
@@ -117,7 +119,7 @@ function Categories() {
 
   return (
     <>
-    <DeleteModal />
+    {/* <DeleteModal /> */}
 
   
    
@@ -217,13 +219,14 @@ function Categories() {
                     <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
                       {value.order}
                     </td>
-                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-1">
-                      <FaRegEdit
-                        size={22}
+                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-3">
+                      <img
+                        src={editIcon}
                         className="text-[#6A717F] cursor-pointer"
                         onClick={() => handleOpenRowEdit(value.product)}
                       />
-                      <RiDeleteBinLine
+                      <img
+                        src={deleteIcon}
                         size={22}
                         className="text-[#6A717F] cursor-pointer"
                       />

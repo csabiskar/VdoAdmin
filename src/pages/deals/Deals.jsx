@@ -2,6 +2,8 @@ import React from "react";
 import Button from "../../components/ui/Button";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import editIcon from '../../assets/Dashboradicons/edit.svg'
+import deleteIcon from '../../assets/Dashboradicons/delete.svg'
 
 
 
@@ -111,11 +113,13 @@ function Deals() {
                   </td>
                   <td className="px-4 sm:px-6 py-4 sm:py-5">
                     <div className="flex justify-center items-center gap-3 sm:gap-4">
-                      <FaRegEdit 
+                      <img
+                      src={editIcon} 
                         className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-blue-600 transition" 
                         title="Edit"
                       />
-                      <RiDeleteBin6Line 
+                      <img
+                      src={deleteIcon} 
                         className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition" 
                         title="Delete"
                       />
