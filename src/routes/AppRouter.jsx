@@ -6,6 +6,7 @@ import Categories from "../pages/categories/Categories";
 import Deals from "../pages/deals/Deals";
 import Blogs from "../pages/blogs/Blogs";
 import Orders from "../pages/orders/Orders";
+import CreateBlog from "../pages/blogs/createblogs";
 
 export const  AppRouter =createBrowserRouter([
 {
@@ -16,7 +17,9 @@ export const  AppRouter =createBrowserRouter([
         {index:true,element:<AddProduct/>},
         {path:"/categories",element:<Categories/>},
         {path:"/deals",element:<Deals/>},
-        {path:"/blogs",element:<Blogs/>},        
+        {path:"/blogs",element:<Blogs/>},    
+        {path:"/blogs/createblog",element:<CreateBlog/>},
+        { path: "/blogs/edit/:id", element: <CreateBlog /> },    
         {path:"/product",element:<ProductManager/>},
         {path:"/orders",element:<Orders/>},        
 
