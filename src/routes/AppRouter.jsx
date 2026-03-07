@@ -27,3 +27,29 @@ export const  AppRouter =createBrowserRouter([
 }
 
 ])
+import Login from "../components/Login";
+import ProtectedRoute from "./ProtectedRoute";
+
+export const AppRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    errorElement: <p>page not found...</p>,
+    children: [
+      { index: true, element: <AddProduct /> },
+      { path: "categories", element: <Categories /> },
+      { path: "deals", element: <Deals /> },
+      { path: "blogs", element: <Blogs /> },
+      { path: "product", element: <ProductManager /> },
+      { path: "orders", element: <Orders /> },
+    ],
+  },
+  {
+    path: "login",
+    element: <Login />,
+  },
+]);
