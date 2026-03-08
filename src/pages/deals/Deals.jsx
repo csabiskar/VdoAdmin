@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import editIcon from '../../assets/Dashboradicons/edit.svg'
 import deleteIcon from '../../assets/Dashboradicons/delete.svg'
+import DealEditModal from "../../components/ui/DealEditModal";
 
 
 
 function Deals() {
+  const [editingDeal, setEditingDeal] = useState(null);
+  const [activeTab, setActiveTab] = useState("hot");
+
+  const pillColors = {
+    "Card - Large": "#FBE7E9",
+    "Card 1":       "#E8E5F4",
+    "Card 2":       "#E8E5F4",
+    "Card 3":       "#E8E5F4",
+    "Card 4":       "#E8E5F4",
+    "Card 5":       "#E8E5F4",
+    "Card 6":       "#E8E5F4",
+  };
   const deals = [
     {
       product: "Dia Caare Millet 70gm",
@@ -48,11 +60,31 @@ function Deals() {
   ];
   return (
     <>
-      <div className="w-full">
+      <div className="w-full pl-[20px]">
         <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
           <h1 className="text-[22px] font-semibold text-[#023337] ">Deals</h1>
 
-          <div className="flex gap-6">
+          {/* Segmented Control */}
+          <div
+            className="flex items-center p-[2px] rounded-[8.91px] w-[343px] h-[32px] bg-[rgba(179,179,179,0.5)]"
+          >
+            {/* Hot deals tab */}
+            <button
+              onClick={() => setActiveTab('hot')}
+              className={`flex-1 h-full flex items-center justify-center cursor-pointer transition rounded-[6.93px] text-[15px] font-semibold tracking-[-0.24px] leading-[20px] ${activeTab === 'hot' ? 'bg-white text-black [border:0.5px_solid_rgba(0,0,0,0.04)]' : 'bg-transparent text-white border-none'}`}
+            >
+              Hot deals
+            </button>
+            {/* Featured Products tab */}
+            <button
+              onClick={() => setActiveTab('featured')}
+              className={`flex-1 h-full flex items-center justify-center cursor-pointer transition rounded-[6.93px] text-[15px] font-semibold tracking-[-0.24px] leading-[20px] ${activeTab === 'featured' ? 'bg-white text-black [border:0.5px_solid_rgba(0,0,0,0.04)]' : 'bg-transparent text-white border-none'}`}
+            >
+              Featured Products
+            </button>
+          </div>
+
+          <div className="flex gap-[60px] items-center">
             <Button>Create New Deals</Button>
           </div>
         </div>
@@ -61,66 +93,70 @@ function Deals() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             {/* HEADER */}
-            <thead className="bg-[#EAF8E7]">
+            <thead className="bg-[#EAF8E7] [&_th]:font-medium text-[17.375px] text-[#222]">
               <tr>
-                <th className="px-4 sm:px-6 w-48.5 h-16.25 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-gray-300 whitespace-nowrap">
+                <th className="pl-[19.11px] py-[19.11px] w-48.5 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                   Deal name
                 </th>
-                <th className="px-4 sm:px-6 w-48.5 h-16.25 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-gray-300 whitespace-nowrap">
+                <th className="pl-[19.11px] py-[19.11px] w-48.5 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                   Product
                 </th>
-                <th className="px-4 sm:px-6 h-16.25 w-33 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-gray-300 whitespace-nowrap">
+                <th className="pl-[19.11px] py-[19.11px] w-33 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                   Discount
                 </th>
-                <th className="px-4 sm:px-6 h-16.25 w-37.5 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-gray-300 whitespace-nowrap">
+                <th className="pl-[19.11px] py-[19.11px] w-37.5 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                   Price
                 </th>
-                <th className="px-4 sm:px-6 h-16.25 w-29.5 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-gray-300 whitespace-nowrap">
+                <th className="pl-[19.11px] py-[6.11px] w-29.5 max-w-[60px] [border-right:1.043px_solid_#DBDBDB]">
                   Actual Price
                 </th>
-                <th className="px-4 sm:px-6 h-16.25 w-50.25 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] border-r border-[#EAF8E7] whitespace-nowrap">
+                <th className="pl-[19.11px] py-[19.11px] w-50.25 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                   Discounted Price
                 </th>
-                <th className="px-4 sm:px-6 h-16.25 w-23.75 font-medium text-sm sm:text-[17.38px] text-[#1E1E1E] text-center whitespace-nowrap">
+                <th className="px-[19.11px] py-[19.11px] w-23.75 text-center whitespace-nowrap">
                   Actions
                 </th>
               </tr>
             </thead>
 
             {/* BODY */}
-            <tbody className="text-gray-800">
+            <tbody className="text-[14px] font-medium text-[#222]">
               {deals.map((item, index) => (
-                <tr key={index} className="border-t border-gray-300 hover:bg-gray-50 transition">
-                  <td className="px-4 sm:px-6 py-4  border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">
+                <tr key={index} className="hover:bg-gray-50 transition [border-top:1.39px_solid_#DBDBDB]">
+                  <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                     Hot Deals
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300  text-sm sm:text-[14px]">
+                  <td className="pl-[19.11px] pr-[45.75px] py-[19.11px] [border-right:1.043px_solid_#DBDBDB]">
                     {item.product}
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">
+                  <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                     20% Off
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300">
-                    <span className="inline-block px-3 sm:px-2 py-1.5 sm:py-1 rounded-lg bg-[#FBE7E9] text-[#1E1E1E] text-xs sm:text-[12px]  whitespace-nowrap">
+                  <td className="px-[19.11px] py-[19.11px] [border-right:1.043px_solid_#DBDBDB]">
+                    <span
+                      className="inline-block rounded-lg text-[12px] font-medium text-[#222] whitespace-nowrap px-[10.43px] py-[3.48px]"
+                      style={{ background: pillColors[item.priceTag] || '#F3F4F6' }}
+                    >
                       {item.priceTag}
                     </span>
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">
+                  <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                     {item.actual}
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300  text-sm sm:text-[14px] whitespace-nowrap">
+                  <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
                     {item.discount}
                   </td>
-                  <td className="px-4 sm:px-6 py-4 sm:py-5">
+                  <td className="px-[19.11px] py-[19.11px]">
                     <div className="flex justify-center items-center gap-3 sm:gap-4">
                       <img
-                      src={editIcon} 
-                        className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-blue-600 transition" 
+                        src={editIcon}
+                        className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-blue-600 transition"
                         title="Edit"
+                        onClick={() => setEditingDeal(item)}
                       />
                       <img
-                      src={deleteIcon} 
-                        className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition" 
+                        src={deleteIcon}
+                        className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition"
                         title="Delete"
                       />
                     </div>
@@ -133,6 +169,18 @@ function Deals() {
       </div>
     </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingDeal && (
+        <DealEditModal
+          deal={editingDeal}
+          onClose={() => setEditingDeal(null)}
+          onSave={(updatedData) => {
+            console.log("Saved deal data:", updatedData);
+            setEditingDeal(null);
+          }}
+        />
+      )}
     </>
   );
 }
