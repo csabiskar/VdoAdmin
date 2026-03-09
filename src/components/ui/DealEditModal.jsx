@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { IoClose } from "react-icons/io5";
-import { FiUpload } from "react-icons/fi";
-import { MdOutlineRefresh } from "react-icons/md";
+import { IoMdImage } from "react-icons/io";
+import { LuRefreshCw } from "react-icons/lu";
 import Button from "./Button";
 
 const CARD_TYPES = ["Card 1", "Card 2", "Card 3", "Card 4"];
@@ -29,6 +29,18 @@ export default function DealEditModal({ deal, onClose, onSave }) {
     if (!file) return;
     const url = URL.createObjectURL(file);
     setForm((prev) => ({ ...prev, image: file, imagePreview: url }));
+    e.target.value = "";
+  };
+
+  const handleReplace = () => {
+    if (form.imagePreview) {
+      URL.revokeObjectURL(form.imagePreview);
+    }
+    setForm((prev) => ({ ...prev, image: null, imagePreview: null }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
   };
 
   const handleSave = () => {
@@ -133,7 +145,7 @@ export default function DealEditModal({ deal, onClose, onSave }) {
                 />
               ) : (
                 <div className="flex flex-col items-center text-gray-400 gap-2">
-                  <FiUpload size={28} />
+                  <IoMdImage size={28} />
                   <span className="text-xs">No image selected</span>
                 </div>
               )}
@@ -142,21 +154,16 @@ export default function DealEditModal({ deal, onClose, onSave }) {
               <div className="absolute bottom-[12px] left-[12px] right-[12px] flex items-center justify-between">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-[4px] h-[36px] px-[12px] py-[8px] border border-[#E5E7EB] rounded-[8px] bg-white text-[14px] font-normal text-[#6A717F] hover:bg-gray-50 transition cursor-pointer"
+                  className="border border-[#E5E7EB] rounded-md h-9 text-[13px] text-[#6A717F] px-2 flex gap-1 justify-center items-center cursor-pointer"
                 >
-                  {/* material-symbols:image-rounded 15×15, fill #6A717F */}
-                  <svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1.66667 15C1.20833 15 0.816111 14.8369 0.491667 14.5108C0.167222 14.1847 0.00444444 13.7917 0 13.3333V1.66667C0 1.20833 0.163111 0.816111 0.489333 0.491667C0.815556 0.167222 1.20833 0.00444444 1.66667 0H13.3333C13.7917 0 14.1842 0.163111 14.5108 0.489333C14.8375 0.815556 15.0003 1.20833 15 1.66667V13.3333C15 13.7917 14.8369 14.1842 14.5108 14.5108C14.1847 14.8375 13.7917 15.0003 13.3333 15H1.66667ZM1.66667 13.3333H13.3333V1.66667H1.66667V13.3333ZM2.5 11.6667H12.5L9.375 7.5L7.08333 10.4167L5.41667 8.33333L2.5 11.6667Z" fill="#6A717F"/>
-                  </svg>
+                  <IoMdImage size={18} />
                   Browse
                 </button>
                 <button
-                  onClick={() =>
-                    setForm((prev) => ({ ...prev, image: null, imagePreview: null }))
-                  }
-                  className="inline-flex items-center gap-[4px] h-[36px] px-[12px] py-[8px] border border-[#E5E7EB] rounded-[8px] bg-white text-[14px] font-normal text-[#6A717F] hover:bg-gray-50 transition cursor-pointer"
+                  onClick={handleReplace}
+                  className="border border-[#E5E7EB] rounded-md h-9 text-[13px] text-[#6A717F] px-2 flex gap-1 justify-center items-center cursor-pointer"
                 >
-                  <MdOutlineRefresh size={15} />
+                  <LuRefreshCw size={16} />
                   Replace
                 </button>
               </div>
@@ -195,20 +202,25 @@ export default function DealEditModal({ deal, onClose, onSave }) {
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
 
-              {/* Computed discount display row */}
-              <div className="w-full h-[48px] flex items-center justify-between border border-[#E5E7EB] rounded-[8px] px-[12px] bg-[#F9FAFB]">
+              {/* Single row: % Off pill on left, "Sale= ₹" input on right */}
+              <div className="w-full h-[48px] flex items-center justify-between border border-[#E5E7EB] rounded-[8px] px-[12px] bg-[#F9FAFB] focus-within:ring-2 focus-within:ring-[#00B207]/40">
                 {discountPct !== null ? (
-                  <span className="h-[32px] px-[10px] inline-flex items-center justify-center rounded-[4px] bg-[#E9F9E6] text-[15px] font-bold text-[#000]">
+                  <span className="h-[32px] px-[10px] inline-flex items-center justify-center rounded-[4px] bg-[#E9F9E6] text-[15px] font-bold text-[#000] flex-shrink-0">
                     {discountPct}% Off
                   </span>
                 ) : (
-                  <span className="text-[15px] text-gray-400">—</span>
+                  <span className="text-[15px] text-gray-400 flex-shrink-0">—</span>
                 )}
-                {salePrice !== null && (
-                  <span className="text-[15px] font-medium text-[#023337]">
-                    Sale= ₹{salePrice}
-                  </span>
-                )}
+                <div className="flex items-center gap-[4px]">
+                  <span className="text-[15px] font-medium text-[#023337]">Sale= ₹</span>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={form.discountedPrice}
+                    onChange={(e) => handleChange("discountedPrice", e.target.value)}
+                    className="w-[80px] bg-transparent text-[15px] font-medium text-[#023337] placeholder-gray-400 focus:outline-none text-right"
+                  />
+                </div>
               </div>
             </div>
           </div>

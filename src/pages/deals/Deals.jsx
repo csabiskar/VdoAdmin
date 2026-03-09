@@ -9,6 +9,7 @@ import DealEditModal from "../../components/ui/DealEditModal";
 
 function Deals() {
   const [editingDeal, setEditingDeal] = useState(null);
+  const [creatingDeal, setCreatingDeal] = useState(false);
   const [activeTab, setActiveTab] = useState("hot");
 
   const pillColors = {
@@ -85,7 +86,7 @@ function Deals() {
           </div>
 
           <div className="flex gap-[60px] items-center">
-            <Button>Create New Deals</Button>
+            <Button onClick={() => setCreatingDeal(true)}>Create New Deals</Button>
           </div>
         </div>
        <div className="mt-16.25">
@@ -178,6 +179,18 @@ function Deals() {
           onSave={(updatedData) => {
             console.log("Saved deal data:", updatedData);
             setEditingDeal(null);
+          }}
+        />
+      )}
+
+      {/* Create New Deal Modal */}
+      {creatingDeal && (
+        <DealEditModal
+          deal={null}
+          onClose={() => setCreatingDeal(false)}
+          onSave={(newData) => {
+            console.log("New deal data:", newData);
+            setCreatingDeal(false);
           }}
         />
       )}
