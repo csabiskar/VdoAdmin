@@ -21,7 +21,7 @@ function Deals() {
     "Card 5":       "#E8E5F4",
     "Card 6":       "#E8E5F4",
   };
-  const deals = [
+  const [deals, setDeals] = useState([
     {
       product: "Dia Caare Millet 70gm",
       priceTag: "Card - Large",
@@ -58,7 +58,12 @@ function Deals() {
       actual: "₹70.00",
       discount: "₹42.00",
     },
-  ];
+  ]);
+
+  const handleDelete = (index) => {
+    setDeals((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <>
       <div className="w-full pl-[20px]">
@@ -159,6 +164,7 @@ function Deals() {
                         src={deleteIcon}
                         className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition"
                         title="Delete"
+                        onClick={() => handleDelete(index)}
                       />
                     </div>
                   </td>
