@@ -44,7 +44,7 @@ export default function EditCategoryStatus({ onCancel, onSave }) {
         </h2>
 
         {/* Category rows */}
-        <div className="flex flex-col gap-3 mb-8 max-h-[420px] overflow-y-auto pr-1">
+        <div className="flex flex-col gap-3 mb-8 max-h-105 overflow-y-auto pr-1">
           {categories.map((cat) => (
             <div key={cat.id} className="flex items-center gap-3">
 
@@ -57,12 +57,12 @@ export default function EditCategoryStatus({ onCancel, onSave }) {
                 {/* Toggle */}
                 <button
                   onClick={() => toggleStatus(cat.id)}
-                  className={`relative w-14 h-7 rounded-full transition-colors duration-300 cursor-pointer focus:outline-none flex-shrink-0 ${
+                  className={`relative w-14 h-7 rounded-full transition-colors duration-300 cursor-pointer focus:outline-none shrink-0 ${
                     cat.active ? "bg-[#00B207]" : "bg-gray-300"
                   }`}
                 >
                   <span
-                    className={`absolute top-[3px] left-[3px] w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                    className={`absolute top-0.75 left-0.75 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
                       cat.active ? "translate-x-7" : "translate-x-0"
                     }`}
                   />
@@ -72,7 +72,7 @@ export default function EditCategoryStatus({ onCancel, onSave }) {
               {/* Edit button — outside the row box */}
               <button
                 onClick={() => handleEdit(cat.id)}
-                className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+                className="w-11 h-11 shrink-0 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition cursor-pointer"
               >
                 <FaRegEdit size={17} className="text-gray-400" />
               </button>
@@ -80,7 +80,7 @@ export default function EditCategoryStatus({ onCancel, onSave }) {
               {/* Delete button — outside the row box */}
               <button
                 onClick={() => handleDelete(cat.id)}
-                className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                className="w-11 h-11 shrink-0 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-red-50 transition cursor-pointer"
               >
                 <RiDeleteBinLine size={17} className="text-gray-400" />
               </button>

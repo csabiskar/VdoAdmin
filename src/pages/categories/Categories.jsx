@@ -7,9 +7,8 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import ModalCard from "../../components/ui/modelcard";
 import EditCategoryStatus from "../../components/ui/Editcategorystatus";
 import DeleteModal from "../../components/ui/Deletemodal";
-import editIcon from '../../assets/Dashboradicons/edit.svg'
-import deleteIcon from '../../assets/Dashboradicons/delete.svg'
-
+import editIcon from "../../assets/Dashboradicons/edit.svg";
+import deleteIcon from "../../assets/Dashboradicons/delete.svg";
 
 const data = [
   "Noodles",
@@ -75,10 +74,11 @@ function Categories() {
   const [activeCategory, setActiveCategory] = useState("");
 
   // Modal state
-  const [modalType, setModalType] = useState(null); 
+  const [modalType, setModalType] = useState(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editRowName, setEditRowName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleOpenAdd = () => {
     setNewCategoryName("");
@@ -100,7 +100,6 @@ function Categories() {
   };
 
   const handleSaveAdd = () => {
-    
     console.log("New category name:", newCategoryName);
     setModalType(null);
   };
@@ -117,12 +116,15 @@ function Categories() {
     setModalType(null);
   };
 
+  const filteredProducts = categoryData.filter((item) =>
+    item.product.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  console.log(filteredProducts);
   return (
     <>
-    {/* <DeleteModal /> */}
+      {/* <DeleteModal /> */}
 
-  
-   
       <div className="w-full min-h-screen">
         {/* header */}
         <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
@@ -169,6 +171,7 @@ function Categories() {
             <input
               type="text"
               placeholder="search your product"
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-66 h-9 rounded-lg border px-2 border-[#E5E7EB] bg-[#F9FAFB] focus:outline-none focus:border-[#00B207] transition placeholder:text-black placeholder:text-sm placeholder:font-light"
             />
             <CiSearch size={22} className="absolute right-14" />
@@ -197,42 +200,48 @@ function Categories() {
                 </tr>
               </thead>
               <tbody className="text-gray-800">
-                {categoryData.map((value, index) => (
-                  <tr
-                    key={index}
-                    className="border-t border-gray-300 hover:bg-gray-50 transition"
-                  >
-                    <td className="px-4 sm:px-6 py-6 text-sm sm:text-[14px] whitespace-nowrap">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-1 items-center justify-center">
-                      <img
-                        src={value.image}
-                        className="object-cover w-10 h-10 border rounded-sm border-[#E5E7EB]"
-                        alt=""
-                      />
-                      {value.product}
-                    </td>
-                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
-                      {value.CreatedDate}
-                    </td>
-                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
-                      {value.order}
-                    </td>
-                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-3">
-                      <img
-                        src={editIcon}
-                        className="text-[#6A717F] cursor-pointer"
-                        onClick={() => handleOpenRowEdit(value.product)}
-                      />
-                      <img
-                        src={deleteIcon}
-                        size={22}
-                        className="text-[#6A717F] cursor-pointer"
-                      />
-                    </td>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td className="text-center w-full py-12" colSpan="5">No products found</td>
                   </tr>
-                ))}
+                ) : (
+                  filteredProducts.map((value, index) => (
+                    <tr
+                      key={index}
+                      className="border-t border-gray-300 hover:bg-gray-50 transition"
+                    >
+                      <td className="px-4 sm:px-6 py-6 text-sm sm:text-[14px] whitespace-nowrap">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-1 items-center justify-center">
+                        <img
+                          src={value.image}
+                          className="object-cover w-10 h-10 border rounded-sm border-[#E5E7EB]"
+                          alt=""
+                        />
+                        {value.product}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
+                        {value.CreatedDate}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
+                        {value.order}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-3">
+                        <img
+                          src={editIcon}
+                          className="text-[#6A717F] cursor-pointer"
+                          onClick={() => handleOpenRowEdit(value.product)}
+                        />
+                        <img
+                          src={deleteIcon}
+                          size={22}
+                          className="text-[#6A717F] cursor-pointer"
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -309,7 +318,6 @@ function Categories() {
             />
           </div>
         </ModalCard>
-        
       )}
     </>
   );

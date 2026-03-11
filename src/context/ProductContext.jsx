@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { addProducts } from "../api/product.api";
+import { addProducts, addProductImages } from "../api/product.api";
 
 const ProductContext = createContext();
 
@@ -9,15 +9,34 @@ export function ProductContextProvider({ children }) {
   const addProduct = async (data) => {
     try {
       setLoading(true);
-      const res = await addProduct(data);
+      const res = await addProducts(data);
       return res;
     } catch (error) {
       setLoading(false);
       console.log(error);
+      throw error;
+    }
+     finally {
+      setLoading(false);
+    }
+  };
+
+  const addproductImage = async (data) => {
+    try {
+      setLoading(true);
+      const res = await addProductImages(data);
+      return res;
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      throw error
+    }
+    finally {
+      setLoading(false);
     }
   };
   return (
-    <ProductContext.Provider value={{ addProduct, loading }}>
+    <ProductContext.Provider value={{ addProduct,addproductImage, loading }}>
       {children}
     </ProductContext.Provider>
   );
