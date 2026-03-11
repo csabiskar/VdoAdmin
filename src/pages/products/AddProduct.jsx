@@ -7,6 +7,7 @@ import { LuRefreshCw } from "react-icons/lu";
 import { CiCircleRemove } from "react-icons/ci";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaCaretDown } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
 
 import {
   RichTextEditorComponent,
@@ -22,9 +23,6 @@ import { useProducts } from "../../context/ProductContext";
 import { useForm, Controller } from "react-hook-form";
 import { getCategory } from "../../api/category.api";
 
-// ─── Compress image to JPEG before upload ─────────────────────────────────────
-// Resizes to max 1024px on the longest side and reduces quality to 0.8
-// This keeps file size well under typical server limits (1–2MB)
 const compressImage = (file) => {
   return new Promise((resolve) => {
     const MAX_SIZE = 1024;
@@ -42,7 +40,6 @@ const compressImage = (file) => {
 
         let { width, height } = img;
 
-        // Scale down if either dimension exceeds MAX_SIZE
         if (width > MAX_SIZE || height > MAX_SIZE) {
           if (width > height) {
             height = Math.round((height * MAX_SIZE) / width);
@@ -61,7 +58,6 @@ const compressImage = (file) => {
 
         canvas.toBlob(
           (blob) => {
-            // Return a new File with the same name but compressed
             const compressedFile = new File([blob], file.name, {
               type: "image/jpeg",
               lastModified: Date.now(),
@@ -109,18 +105,15 @@ export default function AddProduct() {
     setImageUploading(true);
 
     try {
-      // FIX 1: compress before upload to avoid 413 Content Too Large
       const compressed = await compressImage(file);
       const res = await addproductImage(compressed);
 
-      // FIX 2: guard against undefined res — only push if upload succeeded
       if (res?.url) {
         setImages((prev) => [...prev, res.url]);
       } else {
         setUploadError("Upload failed. Please try again.");
       }
     } catch (error) {
-      // FIX 2: catch block now stops execution — res.url is never accessed
       console.error("Image upload failed:", error);
       setUploadError("Upload failed. Please try again.");
     } finally {
@@ -160,6 +153,9 @@ export default function AddProduct() {
       description: formData.description,
       detailedDescription: formData.detailedDescription ?? "",
       categoryId: formData.categoryId,
+      // Tell the backend this is a variant-based product so it doesn't
+      // look for top-level price/stock (which causes the 400 error)
+      hasVariants: true,
       attributes: ["weight"],
       variants: [
         {
@@ -177,11 +173,19 @@ export default function AddProduct() {
       ],
     };
 
-    await addProduct(payload);
+    try {
+      await addProduct(payload);
+      // FIX: toast only runs if addProduct succeeds — not unconditionally
+      toast.success("Product added successfully");
+    } catch (error) {
+      console.error("Product submit failed:", error);
+      toast.error("Failed to add product. Please try again.");
+    }
   };
 
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+      <Toaster />
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
         <h1 className="text-[22px] font-semibold text-[#023337]">
@@ -388,7 +392,6 @@ export default function AddProduct() {
                 )}
               </div>
 
-              {/* Upload error message */}
               {uploadError && (
                 <p className="text-red-500 text-xs">{uploadError}</p>
               )}
