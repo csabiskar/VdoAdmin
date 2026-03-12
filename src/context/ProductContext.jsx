@@ -9,11 +9,15 @@ export function ProductContextProvider({ children }) {
   const addProduct = async (data) => {
     try {
       setLoading(true);
-      const res = await addProduct(data);
+      const res = await addProducts(data);
       return res;
     } catch (error) {
       setLoading(false);
       console.log(error);
+      throw error;
+    }
+     finally {
+      setLoading(false);
     }
   };
 
@@ -25,6 +29,10 @@ export function ProductContextProvider({ children }) {
     } catch (error) {
       setLoading(false);
       console.log(error);
+      throw error
+    }
+    finally {
+      setLoading(false);
     }
   };
   return (
