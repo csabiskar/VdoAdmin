@@ -1,10 +1,3 @@
-/**
- * OrderModal
- *
- * Props:
- *   order   — row object from Orders table
- *   onClose — function to close the modal
- */
 
 const sampleOrderDetails = {
   paymentMethod: "UPI",
