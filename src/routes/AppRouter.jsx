@@ -7,6 +7,8 @@ import Deals from "../pages/deals/Deals";
 import Blogs from "../pages/blogs/Blogs";
 import Orders from "../pages/orders/Orders";
 import CreateBlog from "../pages/blogs/createblogs";
+import UserBlogListing from "../pages/user-blogs/UserBlogListing";
+import UserBlogDetail from "../pages/user-blogs/UserBlogDetail";
 import Login from "../components/Login";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -29,6 +31,14 @@ export const AppRouter = createBrowserRouter([
       { path: "product", element: <ProductManager /> },
       { path: "orders", element: <Orders /> },
     ],
+  },
+  {
+    path: "user-blogs",
+    element: <UserBlogListing />,
+  },
+  {
+    path: "user-blogs/:id",
+    element: <UserBlogDetail />,
   },
   {
     path: "login",
