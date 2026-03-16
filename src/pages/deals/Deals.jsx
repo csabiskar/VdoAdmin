@@ -21,48 +21,90 @@ function Deals() {
     "Card 5":       "#E8E5F4",
     "Card 6":       "#E8E5F4",
   };
-  const [deals, setDeals] = useState([
+  const [hotDeals, setHotDeals] = useState([
     {
       product: "Dia Caare Millet 70gm",
       priceTag: "Card - Large",
       actual: "₹70.00",
       discount: "₹42.00",
+      discountPercent: "20%",
     },
     {
       product: "Little Pasta",
       priceTag: "Card 1",
       actual: "₹40.00",
       discount: "₹26.00",
+      discountPercent: "20%",
     },
     {
       product: "Saamai Noodles",
       priceTag: "Card 2",
       actual: "₹70.00",
       discount: "₹42.00",
+      discountPercent: "20%",
     },
     {
       product: "Herbal Hair Oils",
       priceTag: "Card 3",
       actual: "₹160.00",
       discount: "₹128.00",
+      discountPercent: "20%",
     },
     {
       product: "Moringa Millet Noodles",
       priceTag: "Card 4",
       actual: "₹70.00",
       discount: "₹42.00",
+      discountPercent: "20%",
     },
     {
       product: "Children's Choice Millet Cookies",
       priceTag: "Card 5",
       actual: "₹70.00",
       discount: "₹42.00",
+      discountPercent: "20%",
+    },
+  ]);
+  const [featuredDeals, setFeaturedDeals] = useState([
+    {
+      product: "Childrens Choice Millet Cookies",
+      priceTag: "Card 1",
+      actual: "₹20.00",
+      discount: "₹12.00",
+      discountPercent: "40%",
+    },
+    {
+      product: "Childrens Choice Millet Cookies",
+      priceTag: "Card 2",
+      actual: "₹70.00",
+      discount: "₹42.00",
+      discountPercent: "40%",
+    },
+    {
+      product: "Little Pasta",
+      priceTag: "Card 3",
+      actual: "₹40.00",
+      discount: "₹26.00",
+      discountPercent: "35%",
+    },
+    {
+      product: "Kambu Noodles (Pearl Millet)",
+      priceTag: "Card 4",
+      actual: "₹70.00",
+      discount: "₹42.00",
+      discountPercent: "40%",
     },
   ]);
 
   const handleDelete = (index) => {
-    setDeals((prev) => prev.filter((_, i) => i !== index));
+    if (activeTab === "featured") {
+      setFeaturedDeals((prev) => prev.filter((_, i) => i !== index));
+      return;
+    }
+    setHotDeals((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const displayedDeals = activeTab === "featured" ? featuredDeals : hotDeals;
 
   return (
     <>
@@ -127,16 +169,16 @@ function Deals() {
 
             {/* BODY */}
             <tbody className="text-[14px] font-medium text-[#222]">
-              {deals.map((item, index) => (
+              {displayedDeals.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50 transition [border-top:1.39px_solid_#DBDBDB]">
                   <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
-                    Hot Deals
+                    {activeTab === "featured" ? "Featured Products" : "Hot Deals"}
                   </td>
                   <td className="pl-[19.11px] pr-[45.75px] py-[19.11px] [border-right:1.043px_solid_#DBDBDB]">
                     {item.product}
                   </td>
                   <td className="px-[19.11px] py-[19.11px] whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
-                    20% Off
+                    {item.discountPercent} Off
                   </td>
                   <td className="px-[19.11px] py-[19.11px] [border-right:1.043px_solid_#DBDBDB]">
                     <span
