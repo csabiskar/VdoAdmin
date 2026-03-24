@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../../components/ui/Button";
 import { CiSearch } from "react-icons/ci";
 import Img from "../../assets/product.png";
@@ -9,77 +9,48 @@ import EditCategoryStatus from "../../components/ui/Editcategorystatus";
 import DeleteModal from "../../components/ui/Deletemodal";
 import editIcon from "../../assets/Dashboradicons/edit.svg";
 import deleteIcon from "../../assets/Dashboradicons/delete.svg";
+import { getCategory } from "../../api/category.api";
+import { useSearchParams } from "react-router-dom";
+import { useProducts } from "../../context/ProductContext";
 
-const data = [
-  "Noodles",
-  "Sevai",
-  "Ladduuu",
-  "Healthy Snacks",
-  "Maavuuurandi",
-  "oil",
-];
-
-const categoryData = [
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-  {
-    product: "Kambu Noodles (Pearl Millet)",
-    CreatedDate: "01-01-2025",
-    order: 25,
-    image: Img,
-  },
-];
 
 function Categories() {
-  const [activeCategory, setActiveCategory] = useState("");
+  const { categoryData, setCategoryData, getAllProducts ,getSingleProduct} = useProducts();
 
+  const [activeCategory, setActiveCategory] = useState("Noodles");
   // Modal state
   const [modalType, setModalType] = useState(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editRowName, setEditRowName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const categoryId = searchParams.get(`categoryId`);
+
+  // console.log(categoryData, "llll");
+
+  // console.log(searchParams);
+
+  useEffect(() => {
+    handelAllCategory();
+    getSingleProduct()
+  }, []);
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
+
+  useEffect(()=>{
+    if (!categoryId) return
+    if (categoryId ){
+      const active = categoryData.find(data=> data._id === categoryId)
+      if (active){
+        setSearchParams(active._id)
+      }
+    }
+  },[categoryId,category])
   const handleOpenAdd = () => {
     setNewCategoryName("");
     setModalType("add");
@@ -116,11 +87,26 @@ function Categories() {
     setModalType(null);
   };
 
-  const filteredProducts = categoryData.filter((item) =>
-    item.product.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredProducts = categoryData
+  .filter((item) =>
+    categoryId ? item.categoryId?._id === categoryId : true
+  )
+  .filter((item) =>
+    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   console.log(filteredProducts);
+
+  const handelAllCategory = async () => {
+    try {
+      const res = await getCategory();
+      setCategory(res);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  };
+
   return (
     <>
       {/* <DeleteModal /> */}
@@ -142,24 +128,26 @@ function Categories() {
 
         {/* category pills */}
         <div className="flex flex-wrap gap-5">
-          {data.map((value, index) => (
+          {category.map((value, index) => (
             <div
               key={index}
-              className="border rounded-sm border-black/20 w-62.5 h-12.5 flex gap-2 px-12 items-center cursor-pointer"
-              onClick={() => setActiveCategory(value)}
+              className="border rounded-sm border-black/20 w-62.5 h-12.5 text-[12px] flex gap-2 px-12 items-center  cursor-pointer"
+              onClick={() => {setActiveCategory(value.categoryName)
+                setSearchParams({categoryId:value?._id})
+              }}
             >
               <span
-                className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  activeCategory === value
+                className={`w-5 h-5 rounded-full border flex items-center justify-center   ${
+                  activeCategory === value.categoryName
                     ? "border-[#00B207]"
                     : "border-gray-300"
                 }`}
               >
-                {activeCategory === value && (
+                {activeCategory === value.categoryName && (
                   <span className="w-3 h-3 bg-[#00B207] rounded-full" />
                 )}
               </span>
-              {value}
+              {value.categoryName}
             </div>
           ))}
         </div>
@@ -202,7 +190,9 @@ function Categories() {
               <tbody className="text-gray-800">
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td className="text-center w-full py-12" colSpan="5">No products found</td>
+                    <td className="text-center w-full py-12" colSpan="5">
+                      No products found
+                    </td>
                   </tr>
                 ) : (
                   filteredProducts.map((value, index) => (
@@ -215,14 +205,14 @@ function Categories() {
                       </td>
                       <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-1 items-center justify-center">
                         <img
-                          src={value.image}
+                          src={value.variants[0].images[1]}
                           className="object-cover w-10 h-10 border rounded-sm border-[#E5E7EB]"
                           alt=""
                         />
-                        {value.product}
+                        {value.name}
                       </td>
                       <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
-                        {value.CreatedDate}
+                     {new Date(value.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
                         {value.order}
