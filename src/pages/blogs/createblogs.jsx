@@ -1,6 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/ui/Button";
+import {
+  createBlog,
+  getBlogById,
+  updateBlog,
+  uploadBlogImage,
+} from "../../api/blog.api"; // ← adjust path if needed
 
 // ─── Toolbar Button ───────────────────────────────────────────────────────────
 function ToolbarBtn({ children, onClick, active, title }) {
@@ -45,12 +51,15 @@ function RichTextEditor({ onChange, initialValue }) {
     });
   }, []);
 
-  const execCmd = useCallback((cmd, value = null) => {
-    editorRef.current?.focus();
-    document.execCommand(cmd, false, value);
-    onChange(editorRef.current?.innerHTML || "");
-    updateActiveFormats();
-  }, [onChange, updateActiveFormats]);
+  const execCmd = useCallback(
+    (cmd, value = null) => {
+      editorRef.current?.focus();
+      document.execCommand(cmd, false, value);
+      onChange(editorRef.current?.innerHTML || "");
+      updateActiveFormats();
+    },
+    [onChange, updateActiveFormats]
+  );
 
   const handleFontSize = (e) => {
     const size = e.target.value;
@@ -87,7 +96,6 @@ function RichTextEditor({ onChange, initialValue }) {
     <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-300 focus-within:border-green-400 transition">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-b border-gray-200 bg-gray-50">
-
         {/* Heading */}
         <select
           onMouseDown={(e) => e.stopPropagation()}
@@ -221,10 +229,13 @@ function RichTextEditor({ onChange, initialValue }) {
         <span className="w-px h-5 bg-gray-300 mx-1" />
 
         {/* Link */}
-        <ToolbarBtn title="Insert link" onClick={() => {
-          const url = prompt("Enter URL:");
-          if (url) execCmd("createLink", url);
-        }}>
+        <ToolbarBtn
+          title="Insert link"
+          onClick={() => {
+            const url = prompt("Enter URL:");
+            if (url) execCmd("createLink", url);
+          }}
+        >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" strokeLinecap="round" />
             <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" strokeLinecap="round" />
@@ -278,7 +289,7 @@ function ImageUploadBox({ label, height = "h-36", onUpload, imageUrl, onReplace 
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => onUpload(reader.result);
+    reader.onloadend = () => onUpload(reader.result, file); // ← passes file as 2nd arg
     reader.readAsDataURL(file);
   };
 
@@ -335,7 +346,7 @@ function AdditionalImages({ images, onAdd, onRemove }) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => onAdd(reader.result);
+    reader.onloadend = () => onAdd(reader.result, file); // ← passes file as 2nd arg
     reader.readAsDataURL(file);
   };
 
@@ -389,63 +400,119 @@ function CreateBlog() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
 
-  const [title, setTitle]                   = useState("");
-  const [description, setDescription]       = useState("");
-  const [author, setAuthor]                 = useState("");
-  const [readingTime, setReadingTime]       = useState("");
-  const [thumbnailImg, setThumbnailImg]     = useState(null);
-  const [blogImg, setBlogImg]               = useState(null);
-  const [additionalImgs, setAdditionalImgs] = useState([]);
-  const [category, setCategory]             = useState("");
-  const [loaded, setLoaded]                 = useState(false);
+  const [title, setTitle]                       = useState("");
+  const [description, setDescription]           = useState("");
+  const [author, setAuthor]                     = useState("");
+  const [readingTime, setReadingTime]           = useState("");
+  const [thumbnailImg, setThumbnailImg]         = useState(null);
+  const [blogImg, setBlogImg]                   = useState(null);
+  const [additionalImgs, setAdditionalImgs]     = useState([]);
+  const [category, setCategory]                 = useState("");
+  const [loaded, setLoaded]                     = useState(false);
 
+  // Raw File objects — used only for uploading on publish
+  const [thumbnailFile, setThumbnailFile]       = useState(null);
+  const [blogImgFile, setBlogImgFile]           = useState(null);
+  const [additionalFiles, setAdditionalFiles]   = useState([]);
+
+  // ── Load blog for edit mode ──────────────────────────────────────────────
   useEffect(() => {
     if (!isEditMode) { setLoaded(true); return; }
-    const saved = JSON.parse(localStorage.getItem("blogs") || "[]");
-    const blog = saved.find((b) => String(b.id) === String(id));
-    if (blog) {
-      setTitle(blog.title || "");
-      setDescription(blog.description || "");
-      setAuthor(blog.author || "");
-      setReadingTime(blog.time || "");
-      setThumbnailImg(blog.image || null);
-      setBlogImg(blog.blogImg || null);
-      setAdditionalImgs(blog.additionalImgs || []);
-      setCategory(blog.category || "");
-    }
-    setLoaded(true);
+
+    const fetchBlog = async () => {
+      try {
+        const blog = await getBlogById(id);
+        setTitle(blog.title || "");
+        setDescription(blog.description || "");
+        setAuthor(blog.author || "");
+        setReadingTime(blog.time || "");
+        setThumbnailImg(blog.image || null);
+        setBlogImg(blog.blogImg || null);
+        setAdditionalImgs(blog.additionalImgs || []);
+        setCategory(blog.category || "");
+      } catch (err) {
+        console.error("Failed to load blog:", err);
+        alert("Failed to load blog for editing.");
+      } finally {
+        setLoaded(true);
+      }
+    };
+
+    fetchBlog();
   }, [id, isEditMode]);
 
-  const handlePublish = () => {
+  // ── Image handlers ───────────────────────────────────────────────────────
+  const handleThumbnailUpload = (dataUrl, file) => {
+    setThumbnailImg(dataUrl);
+    setThumbnailFile(file);
+  };
+
+  const handleBlogImgUpload = (dataUrl, file) => {
+    setBlogImg(dataUrl);
+    setBlogImgFile(file);
+  };
+
+  const handleAdditionalAdd = (dataUrl, file) => {
+    setAdditionalImgs((prev) => [...prev, dataUrl]);
+    setAdditionalFiles((prev) => [...prev, file]);
+  };
+
+  const handleAdditionalRemove = (i) => {
+    setAdditionalImgs((prev) => prev.filter((_, idx) => idx !== i));
+    setAdditionalFiles((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
+  // ── Upload a file only if a new one was selected ─────────────────────────
+  const uploadIfNeeded = async (file, existingUrl) => {
+    if (!file) return existingUrl ?? null;
+    const res = await uploadBlogImage(file);
+    // Adjust the key below to match your backend's response shape
+    return res.url ?? res.imageUrl ?? res.data?.url ?? null;
+  };
+
+  // ── Publish / Update ─────────────────────────────────────────────────────
+  const handlePublish = async () => {
     if (!title.trim()) { alert("Please enter a blog title."); return; }
     if (!author.trim()) { alert("Please enter an author name."); return; }
 
-    const saved = JSON.parse(localStorage.getItem("blogs") || "[]");
+    try {
+      const [resolvedThumbnail, resolvedBlogImg, ...resolvedAdditional] =
+        await Promise.all([
+          uploadIfNeeded(thumbnailFile, thumbnailImg),
+          uploadIfNeeded(blogImgFile, blogImg),
+          ...additionalFiles.map((file, i) =>
+            uploadIfNeeded(file, additionalImgs[i])
+          ),
+        ]);
 
-    if (isEditMode) {
-      const updated = saved.map((b) =>
-        String(b.id) === String(id)
-          ? { ...b, title: title.trim(), description, author: author.trim(), time: readingTime.trim() || "N/A", image: thumbnailImg, blogImg, additionalImgs, category }
-          : b
-      );
-      localStorage.setItem("blogs", JSON.stringify(updated));
-    } else {
-      const newBlog = {
-        id: Date.now(),
-        title: title.trim(),
+      const payload = {
+        title:          title.trim(),
         description,
-        author: author.trim(),
-        time: readingTime.trim() || "N/A",
-        status: "Published",
-        publishedOn: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-        image: thumbnailImg || null,
-        blogImg: blogImg || null,
-        additionalImgs,
+        author:         author.trim(),
+        time:           readingTime.trim() || "N/A",
+        image:          resolvedThumbnail,
+        blogImg:        resolvedBlogImg,
+        additionalImgs: resolvedAdditional,
         category,
       };
-      localStorage.setItem("blogs", JSON.stringify([...saved, newBlog]));
+
+      if (isEditMode) {
+        await updateBlog(id, payload);
+      } else {
+        await createBlog({
+          ...payload,
+          status:      "Published",
+          publishedOn: new Date().toLocaleDateString("en-GB", {
+            day: "2-digit", month: "short", year: "numeric",
+          }),
+        });
+      }
+
+      navigate("/blogs");
+    } catch (err) {
+      console.error("Publish failed:", err);
+      alert("Failed to save blog. Please try again.");
     }
-    navigate("/blogs");
   };
 
   if (!loaded) return null;
@@ -513,21 +580,21 @@ function CreateBlog() {
             label="Add Thumbnail Image (ex: Shown in blog listing)"
             height="h-36"
             imageUrl={thumbnailImg}
-            onUpload={setThumbnailImg}
+            onUpload={handleThumbnailUpload}
           />
 
           <ImageUploadBox
             label="Blog Image (ex: Shown inside blog)"
             height="h-36"
             imageUrl={blogImg}
-            onUpload={setBlogImg}
-            onReplace={() => setBlogImg(null)}
+            onUpload={handleBlogImgUpload}
+            onReplace={() => { setBlogImg(null); setBlogImgFile(null); }}
           />
 
           <AdditionalImages
             images={additionalImgs}
-            onAdd={(url) => setAdditionalImgs((prev) => [...prev, url])}
-            onRemove={(i) => setAdditionalImgs((prev) => prev.filter((_, idx) => idx !== i))}
+            onAdd={handleAdditionalAdd}
+            onRemove={handleAdditionalRemove}
           />
 
           <div>

@@ -5,14 +5,8 @@ import editIcon from '../../assets/Dashboradicons/edit.svg';
 import deleteIcon from '../../assets/Dashboradicons/delete.svg';
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../../components/ui/DeleteModal"; // adjust path if needed
+import { getAllBlogs, deleteBlog } from "../../api/blog.api";
 
-const SEED_BLOGS = [
-  { id: "seed-1", title: "Millet - The Super Food", time: "5 min", author: "Admin", status: "draft",     publishedOn: "03 Jan 2030", image: null },
-  { id: "seed-2", title: "Millet - The Super Food", time: "5 min", author: "Admin", status: "Published", publishedOn: "03 Jan 2030", image: null },
-  { id: "seed-3", title: "Millet - The Super Food", time: "5 min", author: "Admin", status: "Published", publishedOn: "03 Jan 2030", image: null },
-  { id: "seed-4", title: "Millet - The Super Food", time: "5 min", author: "Admin", status: "draft",     publishedOn: "03 Jan 2030", image: null },
-  { id: "seed-5", title: "Millet - The Super Food", time: "5 min", author: "Admin", status: "Published", publishedOn: "03 Jan 2030", image: null },
-];
 
 function Blogs() {
   const navigate = useNavigate();
@@ -20,23 +14,37 @@ function Blogs() {
   const [deleteTargetId, setDeleteTargetId] = useState(null); // null = modal closed
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("blogs") || "[]");
-    setBlogs([...SEED_BLOGS, ...saved]);
+    fetchBlogs();
   }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const res = await getAllBlogs();
+      setBlogs(res.data || []);
+    } catch (error)  {
+      console.error("Failed to fetch blogs", error);
+      setBlogs([]);
+    }
+  };
 
   // Opens the confirmation modal
   const handleDeleteClick = (id) => {
     setDeleteTargetId(id);
   };
 
-  // Confirmed — actually delete
-  const handleConfirmDelete = () => {
-    const saved = JSON.parse(localStorage.getItem("blogs") || "[]");
-    const updated = saved.filter((b) => b.id !== deleteTargetId);
-    localStorage.setItem("blogs", JSON.stringify(updated));
-    setBlogs((prev) => prev.filter((b) => b.id !== deleteTargetId));
-    setDeleteTargetId(null);
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteBlog(deleteTargetId);
+
+      setBlogs((prev) => prev.filter((b) => b._id !== deleteTargetId));
+
+      setDeleteTargetId(null);
+    }catch (error) {
+      console.error("Delete blog failed", error);
+    }
   };
+
+
 
   // Cancelled — close modal
   const handleCancelDelete = () => {
@@ -80,7 +88,7 @@ function Blogs() {
               </thead>
               <tbody className="text-gray-800">
                 {blogs.map((item) => (
-                  <tr key={item.id} className="border-t border-gray-300 hover:bg-gray-50 transition">
+                  <tr key={item._id} className="border-t border-gray-300 hover:bg-gray-50 transition">
                     <td className="px-4 sm:px-6 py-4 flex gap-2 items-center border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">
                       <img src={item.image || Img} className="w-8 h-8 rounded object-cover" alt="" />
                       {item.title}
@@ -99,13 +107,13 @@ function Blogs() {
                           src={editIcon}
                           className="cursor-pointer hover:opacity-70 transition"
                           title="Edit"
-                          onClick={() => handleEdit(item.id)}
+                          onClick={() => handleEdit(item._id)}
                         />
                         <img
                           src={deleteIcon}
                           className="cursor-pointer hover:opacity-70 transition"
                           title="Delete"
-                          onClick={() => handleDeleteClick(item.id)}
+                          onClick={() => handleDeleteClick(item._idid)}
                         />
                       </div>
                     </td>
