@@ -6,7 +6,7 @@ import {
   getBlogById,
   updateBlog,
   uploadBlogImage,
-} from "../../api/blog.api"; // ← adjust path if needed
+} from "../../api/blog.api";
 
 // ─── Toolbar Button ───────────────────────────────────────────────────────────
 function ToolbarBtn({ children, onClick, active, title }) {
@@ -289,7 +289,7 @@ function ImageUploadBox({ label, height = "h-36", onUpload, imageUrl, onReplace 
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => onUpload(reader.result, file); // ← passes file as 2nd arg
+    reader.onloadend = () => onUpload(reader.result, file);
     reader.readAsDataURL(file);
   };
 
@@ -339,14 +339,14 @@ function ImageUploadBox({ label, height = "h-36", onUpload, imageUrl, onReplace 
 }
 
 // ─── Additional Images ────────────────────────────────────────────────────────
-function AdditionalImages({ images, onAdd, onRemove }) {
+function AdditionalImages({ images, onAdd, onRemove, additionalFiles }) {
   const inputRef = useRef();
 
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => onAdd(reader.result, file); // ← passes file as 2nd arg
+    reader.onloadend = () => onAdd(reader.result, file);
     reader.readAsDataURL(file);
   };
 
@@ -377,9 +377,11 @@ function AdditionalImages({ images, onAdd, onRemove }) {
         </div>
       )}
 
+{console.log(additionalFiles.length, "kkk")}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
+        disabled={additionalFiles.length >= 1}
         className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-green-400 transition group"
       >
         <span className="w-6 h-6 bg-[#00B207] rounded-full flex items-center justify-center text-white group-hover:bg-green-700 transition">
@@ -400,20 +402,19 @@ function CreateBlog() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
 
-  const [title, setTitle]                       = useState("");
-  const [description, setDescription]           = useState("");
-  const [author, setAuthor]                     = useState("");
-  const [readingTime, setReadingTime]           = useState("");
-  const [thumbnailImg, setThumbnailImg]         = useState(null);
-  const [blogImg, setBlogImg]                   = useState(null);
-  const [additionalImgs, setAdditionalImgs]     = useState([]);
-  const [category, setCategory]                 = useState("");
-  const [loaded, setLoaded]                     = useState(false);
+  const [title, setTitle]                     = useState("");
+  const [description, setDescription]         = useState("");
+  const [author, setAuthor]                   = useState("");
+  const [readingTime, setReadingTime]         = useState("");
+  const [thumbnailImg, setThumbnailImg]       = useState(null);
+  const [blogImg, setBlogImg]                 = useState(null);
+  const [additionalImgs, setAdditionalImgs]   = useState([]);
+  const [category, setCategory]               = useState("");
+  const [loaded, setLoaded]                   = useState(false);
 
-  // Raw File objects — used only for uploading on publish
-  const [thumbnailFile, setThumbnailFile]       = useState(null);
-  const [blogImgFile, setBlogImgFile]           = useState(null);
-  const [additionalFiles, setAdditionalFiles]   = useState([]);
+  const [thumbnailFile, setThumbnailFile]     = useState(null);
+  const [blogImgFile, setBlogImgFile]         = useState(null);
+  const [additionalFiles, setAdditionalFiles] = useState([]);
 
   // ── Load blog for edit mode ──────────────────────────────────────────────
   useEffect(() => {
@@ -421,15 +422,23 @@ function CreateBlog() {
 
     const fetchBlog = async () => {
       try {
-        const blog = await getBlogById(id);
+        const res = await getBlogById(id);
+
+        // ✅ FIX: API response is { blog: { ...blogData } } — unwrap it
+        const blog = res?.blog ?? res;
+
         setTitle(blog.title || "");
         setDescription(blog.description || "");
         setAuthor(blog.author || "");
-        setReadingTime(blog.time || "");
-        setThumbnailImg(blog.image || null);
-        setBlogImg(blog.blogImg || null);
-        setAdditionalImgs(blog.additionalImgs || []);
+        setReadingTime(blog.readingTime || "");
         setCategory(blog.category || "");
+
+        // ✅ FIX: images is a flat array — map positionally
+        const imgs = blog.images || [];
+        setThumbnailImg(imgs[0] || null);
+        setBlogImg(imgs[1] || null);
+        setAdditionalImgs(imgs.slice(2));
+
       } catch (err) {
         console.error("Failed to load blog:", err);
         alert("Failed to load blog for editing.");
@@ -466,7 +475,6 @@ function CreateBlog() {
   const uploadIfNeeded = async (file, existingUrl) => {
     if (!file) return existingUrl ?? null;
     const res = await uploadBlogImage(file);
-    // Adjust the key below to match your backend's response shape
     return res.url ?? res.imageUrl ?? res.data?.url ?? null;
   };
 
@@ -486,13 +494,11 @@ function CreateBlog() {
         ]);
 
       const payload = {
-        title:          title.trim(),
+        title:       title.trim(),
         description,
-        author:         author.trim(),
-        time:           readingTime.trim() || "N/A",
-        image:          resolvedThumbnail,
-        blogImg:        resolvedBlogImg,
-        additionalImgs: resolvedAdditional,
+        author:      author.trim(),
+        readingTime: readingTime.trim() || "N/A",
+        images:      [resolvedThumbnail, resolvedBlogImg, ...resolvedAdditional],
         category,
       };
 
@@ -514,6 +520,7 @@ function CreateBlog() {
       alert("Failed to save blog. Please try again.");
     }
   };
+
 
   if (!loaded) return null;
 
@@ -595,6 +602,8 @@ function CreateBlog() {
             images={additionalImgs}
             onAdd={handleAdditionalAdd}
             onRemove={handleAdditionalRemove}
+            additionalFiles={additionalFiles}
+
           />
 
           <div>

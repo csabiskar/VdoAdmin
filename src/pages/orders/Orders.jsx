@@ -52,12 +52,14 @@ function StatusBadge({ status }) {
   );
 }
 
+const PAGE_SIZE = 10; // rows per page
+
 export default function Orders() {
   const [ordersData, setOrdersData] = useState([]);
   const [searchField, setSearchField] = useState("Order ID");
   const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
 
   const [fieldDropdownOpen, setFieldDropdownOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -71,11 +73,12 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
 
   const fields = ["Order ID", "Customer Name", "Tracking ID"];
-  const statuses = ["All", "Out for delivery", "Shipped", "Returned"];
+  const statuses = ["All", "Order received", "Processing", "On the way", "Delivered"];
 
   const formatOrderForUI = (order) => ({
     id: order._id,
-    displayId: order.orderNumber || `#${String(order._id).slice(-5).toUpperCase()}`,
+    displayId:
+      order.orderNumber || `#${String(order._id).slice(-5).toUpperCase()}`,
     status: order.orderStatus || "Out for delivery",
     item: order.totalItems || order.items?.length || 0,
     customerId: order.userId?._id || order.userId || "-",
@@ -90,7 +93,8 @@ export default function Orders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await getAllOrders();
+      // Fetch all orders at once — pagination is handled on the frontend
+      const res = await getAllOrders({ page: 1, limit: 10000 });
 
       const ordersArray = Array.isArray(res)
         ? res
@@ -117,21 +121,41 @@ export default function Orders() {
     fetchOrders();
   }, []);
 
+  // ── Reset to page 1 whenever search/filter changes ──────────────────────
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue, searchField, statusFilter]);
+
+  // ── Filter all orders ────────────────────────────────────────────────────
   const filteredOrders = ordersData.filter((order) => {
     const matchesSearch =
       searchValue === "" ||
       (searchField === "Order ID" &&
-        (order.displayId || "").toLowerCase().includes(searchValue.toLowerCase())) ||
+        (order.displayId || "")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase())) ||
       (searchField === "Customer Name" &&
-        (order.customerName || "").toLowerCase().includes(searchValue.toLowerCase())) ||
+        (order.customerName || "")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase())) ||
       (searchField === "Tracking ID" &&
-        (order.trackingId || "").toLowerCase().includes(searchValue.toLowerCase()));
+        (order.trackingId || "")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase()));
 
     const matchesStatus =
       !statusFilter || statusFilter === "All" || order.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
+
+  // ── Frontend pagination ──────────────────────────────────────────────────
+  const totalItems = filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const paginatedOrders = filteredOrders.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
   const columns = [
     "Order ID",
@@ -145,12 +169,32 @@ export default function Orders() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", padding: "20px", fontFamily: "'Segoe UI', sans-serif" }}>
-      <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#1A1A2E", marginBottom: "24px" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        padding: "20px",
+        fontFamily: "'Segoe UI', sans-serif",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "22px",
+          fontWeight: 700,
+          color: "#1A1A2E",
+          marginBottom: "24px",
+        }}
+      >
         Orders
       </h1>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}
+      >
         <div style={{ position: "relative" }}>
           <button
             onClick={() => {
@@ -201,9 +245,12 @@ export default function Orders() {
                     fontSize: "13px",
                     color: "#374151",
                     cursor: "pointer",
-                    backgroundColor: searchField === f ? "#F0FFF4" : "transparent",
+                    backgroundColor:
+                      searchField === f ? "#F0FFF4" : "transparent",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F9FAFB")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#F9FAFB")
+                  }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.backgroundColor =
                       searchField === f ? "#F0FFF4" : "transparent")
@@ -216,7 +263,14 @@ export default function Orders() {
           )}
         </div>
 
-        <div style={{ position: "relative", flex: "1", minWidth: "180px", maxWidth: "280px" }}>
+        <div
+          style={{
+            position: "relative",
+            flex: "1",
+            minWidth: "180px",
+            maxWidth: "280px",
+          }}
+        >
           <Search
             size={14}
             style={{
@@ -303,7 +357,9 @@ export default function Orders() {
                         ? "#F0FFF4"
                         : "transparent",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F9FAFB")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#F9FAFB")
+                  }
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor =
                       statusFilter === s || (s === "All" && !statusFilter)
@@ -329,9 +385,20 @@ export default function Orders() {
         }}
       >
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "13px",
+            }}
+          >
             <thead>
-              <tr style={{ borderBottom: "1px solid #E3E6EF", backgroundColor: "#EAF8E7" }}>
+              <tr
+                style={{
+                  borderBottom: "1px solid #E3E6EF",
+                  backgroundColor: "#EAF8E7",
+                }}
+              >
                 {columns.map((col) => (
                   <th
                     key={col}
@@ -356,22 +423,32 @@ export default function Orders() {
                 <tr>
                   <td
                     colSpan={columns.length}
-                    style={{ padding: "32px", textAlign: "center", color: "#9CA3AF", fontSize: "14px" }}
+                    style={{
+                      padding: "32px",
+                      textAlign: "center",
+                      color: "#9CA3AF",
+                      fontSize: "14px",
+                    }}
                   >
                     Loading orders...
                   </td>
                 </tr>
-              ) : filteredOrders.length === 0 ? (
+              ) : paginatedOrders.length === 0 ? (
                 <tr>
                   <td
                     colSpan={columns.length}
-                    style={{ padding: "32px", textAlign: "center", color: "#9CA3AF", fontSize: "14px" }}
+                    style={{
+                      padding: "32px",
+                      textAlign: "center",
+                      color: "#9CA3AF",
+                      fontSize: "14px",
+                    }}
                   >
                     No orders found.
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order, idx) => (
+                paginatedOrders.map((order, idx) => (
                   <tr
                     key={order.id || idx}
                     style={{
@@ -379,8 +456,12 @@ export default function Orders() {
                       transition: "background 0.15s",
                       backgroundColor: "#FFFFFF",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FAFAFA")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#FFFFFF")}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#FAFAFA")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#FFFFFF")
+                    }
                   >
                     <td style={{ padding: "11px 20px", borderRight: "1px solid #F0F2F7" }}>
                       {order.displayId}
@@ -392,7 +473,7 @@ export default function Orders() {
                       {order.item}
                     </td>
                     <td style={{ padding: "11px 20px", borderRight: "1px solid #F0F2F7" }}>
-                      {order.customerId}
+                      {order.id}
                     </td>
                     <td style={{ padding: "11px 20px", borderRight: "1px solid #F0F2F7" }}>
                       {order.customerName}
@@ -458,6 +539,62 @@ export default function Orders() {
         </div>
       </div>
 
+      {/* PAGINATION */}
+      <div className="flex items-center justify-between mt-6 text-sm flex-wrap gap-3">
+        {/* LEFT TEXT */}
+        <div className="text-gray-500">
+          Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1} to{" "}
+          {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} results
+        </div>
+
+        {/* RIGHT PAGINATION */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {(() => {
+            const visiblePages = 3;
+
+            return (
+              <>
+                {[...Array(Math.min(visiblePages, totalPages))].map((_, i) => {
+                  const pageNumber = i + 1;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => setPage(pageNumber)}
+                      className={`
+                        w-10 h-10 flex items-center justify-center
+                        rounded text-sm transition text-[15px]
+                        ${
+                          page === pageNumber
+                            ? "bg-[#C1E6BA] text-[#023337] font-bold"
+                            : "text-[#023337] hover:bg-gray-100 border border-[#D1D5DB] font-medium"
+                        }
+                      `}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+
+                {totalPages > visiblePages && (
+                  <span className="w-10 h-10 flex items-center justify-center rounded border border-[#D1D5DB] text-[#023337] text-[15px] font-bold">
+                    ....
+                  </span>
+                )}
+
+                {totalPages > visiblePages && (
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    className="px-4 h-10 flex items-center rounded border border-[#D1D5DB] text-[#023337] text-[15px] font-medium"
+                  >
+                    Last page
+                  </button>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      </div>
+
       {editModalOpen && selectedOrder && (
         <EditStatusModal
           orderId={selectedOrder.id}
@@ -465,13 +602,11 @@ export default function Orders() {
           onSave={async (status) => {
             try {
               await updateOrderStatus(selectedOrder.id, status);
-
               setOrdersData((prev) =>
                 prev.map((order) =>
-                  order.id === selectedOrder.id ? { ...order, status } : order
-                )
+                  order.id === selectedOrder.id ? { ...order, status } : order,
+                ),
               );
-
               setEditModalOpen(false);
             } catch (error) {
               console.error("Failed to update order status:", error);

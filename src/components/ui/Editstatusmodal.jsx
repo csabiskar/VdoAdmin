@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-const STATUSES = ["Shipped", "Out for Delivery", "Returned"];
+const STATUSES = [
+  "Order received",
+  "Processing",
+  "On the way",
+  "Delivered"
+];
 
 export default function EditStatusModal({ orderId = "#59217", currentStatus = "Out for Delivery", onSave, onCancel }) {
   const [selected, setSelected] = useState(currentStatus);
