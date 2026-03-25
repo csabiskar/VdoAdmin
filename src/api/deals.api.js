@@ -20,9 +20,9 @@ export const getFeaturedDeals = async () => {
   }
 };
 
-export const editFeaturedDeals = async (id) => {
+export const editFeaturedDeals = async (id,data) => {
   try {
-    const res = await API.patch(`products/isFeatured/${id}`);
+    const res = await API.patch(`products/isFeatured/${id}`,data);
     return res.data;
   } catch (error) {
     console.error("Fetch Featured Deals Error:", error.response?.data || error);
@@ -30,9 +30,9 @@ export const editFeaturedDeals = async (id) => {
   }
 };
 
-export const editDeals = async (id) => {
+export const editDeals = async (id,data) => {
   try {
-    const res = await API.patch(`products/isHotDeals/${id}`);
+    const res = await API.patch(`products/isHotDeals/${id}`,data);
     return res.data;
   } catch (error) {
     console.error("Fetch All HotDeals Error:", error.response?.data || error);
