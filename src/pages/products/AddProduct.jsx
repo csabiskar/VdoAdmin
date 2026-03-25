@@ -306,9 +306,6 @@ export default function AddProduct() {
         </h1>
 
         <div className="flex gap-6">
-          <Button type="button" variant="outline">
-            Preview Product
-          </Button>
           <Button type="submit" disabled={loading}>
             {loading ? "Publishing..." : "Publish Product"}
           </Button>

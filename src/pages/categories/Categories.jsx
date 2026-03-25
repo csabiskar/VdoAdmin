@@ -9,48 +9,42 @@ import EditCategoryStatus from "../../components/ui/Editcategorystatus";
 import DeleteModal from "../../components/ui/Deletemodal";
 import editIcon from "../../assets/Dashboradicons/edit.svg";
 import deleteIcon from "../../assets/Dashboradicons/delete.svg";
-import { getCategory } from "../../api/category.api";
+import { getCategory, getProductsForCategory } from "../../api/category.api";
 import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
 
-
 function Categories() {
-  const { categoryData, setCategoryData, getAllProducts ,getSingleProduct} = useProducts();
+  const { categoryData, setCategoryData, getAllProducts, getSingleProduct } =
+    useProducts();
 
   const [activeCategory, setActiveCategory] = useState("Noodles");
-  // Modal state
   const [modalType, setModalType] = useState(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editRowName, setEditRowName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState([]);
+  const [allProduct, setAllProduct] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const categoryId = searchParams.get(`categoryId`);
-
-  // console.log(categoryData, "llll");
-
-  // console.log(searchParams);
+  const categoryId = searchParams.get("categoryId");
 
   useEffect(() => {
     handelAllCategory();
-    getSingleProduct()
   }, []);
 
   useEffect(() => {
-    getAllProducts();
+    handelAllProduct();
   }, []);
 
-  useEffect(()=>{
-    if (!categoryId) return
-    if (categoryId ){
-      const active = categoryData.find(data=> data._id === categoryId)
-      if (active){
-        setSearchParams(active._id)
-      }
+  useEffect(() => {
+    if (!categoryId) return;
+    const active = categoryData.find((data) => data._id === categoryId);
+    if (active) {
+      setActiveCategory(active.categoryName);
     }
-  },[categoryId,category])
+  }, [categoryId, categoryData]);
+
   const handleOpenAdd = () => {
     setNewCategoryName("");
     setModalType("add");
@@ -71,31 +65,22 @@ function Categories() {
   };
 
   const handleSaveAdd = () => {
-    console.log("New category name:", newCategoryName);
     setModalType(null);
   };
 
   const handleSaveEdit = () => {
-    // TODO: integrate with your API / state
-    console.log("Updated category name:", editCategoryName);
     setModalType(null);
   };
 
   const handleSaveRowEdit = () => {
-    // TODO: integrate with your API / state
-    console.log("Updated product name:", editRowName);
     setModalType(null);
   };
 
-  const filteredProducts = categoryData
-  .filter((item) =>
-    categoryId ? item.categoryId?._id === categoryId : true
-  )
-  .filter((item) =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  console.log(filteredProducts);
+  const filteredProducts = allProduct
+    .filter((item) => (categoryId ? item.categoryId?._id === categoryId : true))
+    .filter((item) =>
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
 
   const handelAllCategory = async () => {
     try {
@@ -107,10 +92,25 @@ function Categories() {
     }
   };
 
+  const handelAllProduct = async () => {
+    try {
+      const res = await getProductsForCategory();
+      setAllProduct(res.products);
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Helper: safely get first available image from a product
+  const getProductImage = (product) => {
+    console.log(product, "image");
+    const images = product?.variants?.[1]?.images;
+    if (images && images.length > 0) return images[1];
+    return images;
+  };
+
   return (
     <>
-      {/* <DeleteModal /> */}
-
       <div className="w-full min-h-screen">
         {/* header */}
         <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
@@ -131,13 +131,14 @@ function Categories() {
           {category.map((value, index) => (
             <div
               key={index}
-              className="border rounded-sm border-black/20 w-62.5 h-12.5 text-[12px] flex gap-2 px-12 items-center  cursor-pointer"
-              onClick={() => {setActiveCategory(value.categoryName)
-                setSearchParams({categoryId:value?._id})
+              className="border rounded-sm border-black/20 w-62.5 h-12.5 text-[12px] flex gap-2 px-12 items-center cursor-pointer"
+              onClick={() => {
+                setActiveCategory(value.categoryName);
+                setSearchParams({ categoryId: value._id });
               }}
             >
               <span
-                className={`w-5 h-5 rounded-full border flex items-center justify-center   ${
+                className={`w-5 h-5 rounded-full border flex items-center justify-center ${
                   activeCategory === value.categoryName
                     ? "border-[#00B207]"
                     : "border-gray-300"
@@ -180,7 +181,7 @@ function Categories() {
                     Created Date
                   </th>
                   <th className="px-4 sm:px-6 w-60.75 h-16 font-medium text-sm sm:text-[15px] text-[#1E1E1E] whitespace-nowrap">
-                    Order
+                    Varients
                   </th>
                   <th className="px-4 sm:px-6 w-60.75 h-16 font-medium text-sm sm:text-[15px] text-[#1E1E1E] whitespace-nowrap">
                     Action
@@ -190,7 +191,7 @@ function Categories() {
               <tbody className="text-gray-800">
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td className="text-center w-full py-12" colSpan="5">
+                    <td className="text-center py-12" colSpan="5">
                       No products found
                     </td>
                   </tr>
@@ -200,34 +201,44 @@ function Categories() {
                       key={index}
                       className="border-t border-gray-300 hover:bg-gray-50 transition"
                     >
-                      <td className="px-4 sm:px-6 py-6 text-sm sm:text-[14px] whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap align-middle">
                         {index + 1}
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-1 items-center justify-center">
-                        <img
-                          src={value.variants[0].images[1]}
-                          className="object-cover w-10 h-10 border rounded-sm border-[#E5E7EB]"
-                          alt=""
-                        />
-                        {value.name}
+
+                      {/* Product — left-aligned with image + name */}
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap align-middle">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={value?.variants[0]?.images[1]}
+                            className="object-cover w-10 h-10 border rounded-sm border-[#E5E7EB] shrink-0"
+                            alt=""
+                          />
+                          <span>{value.name}</span>
+                        </div>
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
-                     {new Date(value.createdAt).toLocaleDateString()}
+
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap align-middle">
+                        {new Date(value.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap">
-                        {value.order}
+
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap align-middle">
+                        {value.variants.length}
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap flex gap-3">
-                        <img
-                          src={editIcon}
-                          className="text-[#6A717F] cursor-pointer"
-                          onClick={() => handleOpenRowEdit(value.product)}
-                        />
-                        <img
-                          src={deleteIcon}
-                          size={22}
-                          className="text-[#6A717F] cursor-pointer"
-                        />
+
+                      <td className="px-4 sm:px-6 py-4 text-sm sm:text-[14px] whitespace-nowrap align-middle">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={editIcon}
+                            className="cursor-pointer"
+                            onClick={() => handleOpenRowEdit(value.name)}
+                            alt="edit"
+                          />
+                          <img
+                            src={deleteIcon}
+                            className="cursor-pointer"
+                            alt="delete"
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))

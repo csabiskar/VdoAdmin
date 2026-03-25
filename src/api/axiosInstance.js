@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL:"https://vdo-naturals-production.up.railway.app/api",
-  // baseURL: "http://172.16.125.188:8080/api",
+  // baseURL: "http://10.68.41.130:8080/api",
   headers: { "Content-Type": "application/json" },
 });
 

@@ -3,7 +3,7 @@ import Button from "../../components/ui/Button";
 import editIcon from '../../assets/Dashboradicons/edit.svg'
 import deleteIcon from '../../assets/Dashboradicons/delete.svg'
 import DealEditModal from "../../components/ui/DealEditModal";
-import { getDeals, getFeaturedDeals } from "../../api/deals.api";
+import { getDeals, getFeaturedDeals, editDeals, editFeaturedDeals } from "../../api/deals.api";
 
 const priceTagKeys = ["Card - Large", "Card 1", "Card 2", "Card 3", "Card 4", "Card 5", "Card 6"];
 
@@ -46,7 +46,6 @@ function Deals() {
     setLoading(true);
     try {
       const res = await getDeals();
-      // getDeals returns res.data (axios), so shape is: { data: { product: [...] } }
       const products = res?.product ?? [];
       setHotDeals(products.map((item, i) => mapProduct(item, i)));
     } catch (err) {
@@ -59,7 +58,6 @@ function Deals() {
   const fetchFeaturedDeals = async () => {
     try {
       const res = await getFeaturedDeals();
-      // getFeaturedDeals returns res.data (axios), so shape is: { data: { product: [...] } }
       const products = res?.product ?? [];
       setFeaturedDeals(products.map((item, i) => mapProduct(item, i)));
     } catch (err) {
@@ -67,12 +65,19 @@ function Deals() {
     }
   };
 
-  const handleDelete = (index) => {
-    if (activeTab === "featured") {
-      setFeaturedDeals((prev) => prev.filter((_, i) => i !== index));
-      return;
+  // ✅ Calls the correct PATCH API then removes from UI on success
+  const handleDelete = async (item, index) => {
+    try {
+      if (activeTab === "featured") {
+        await editFeaturedDeals(item._id, { isFeatured: false });
+        setFeaturedDeals((prev) => prev.filter((_, i) => i !== index));
+      } else {
+        await editDeals(item._id, { isHotDeals: false });
+        setHotDeals((prev) => prev.filter((_, i) => i !== index));
+      }
+    } catch (err) {
+      console.error("Failed to delete deal:", err);
     }
-    setHotDeals((prev) => prev.filter((_, i) => i !== index));
   };
 
   const displayedDeals = activeTab === "featured" ? featuredDeals : hotDeals;
@@ -189,16 +194,10 @@ function Deals() {
                         <td className="px-[19.11px] py-[19.11px]">
                           <div className="flex justify-center items-center gap-3 sm:gap-4">
                             <img
-                              src={editIcon}
-                              className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-blue-600 transition"
-                              title="Edit"
-                              onClick={() => setEditingDeal(item)}
-                            />
-                            <img
                               src={deleteIcon}
                               className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition"
                               title="Delete"
-                              onClick={() => handleDelete(index)}
+                              onClick={() => handleDelete(item, index)} // ✅ passes item (for _id) and index (for UI removal)
                             />
                           </div>
                         </td>
