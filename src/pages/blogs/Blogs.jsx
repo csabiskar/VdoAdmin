@@ -4,14 +4,14 @@ import Img from "../../assets/blog.png";
 import editIcon from '../../assets/Dashboradicons/edit.svg';
 import deleteIcon from '../../assets/Dashboradicons/delete.svg';
 import { useNavigate } from "react-router-dom";
-import DeleteModal from "../../components/ui/DeleteModal"; // adjust path if needed
+import DeleteModal from "../../components/ui/Deletemodal";
 import { getAllBlogs, deleteBlog } from "../../api/blog.api";
 
 
 function Blogs() {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
-  const [deleteTargetId, setDeleteTargetId] = useState(null); // null = modal closed
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
     fetchBlogs();
@@ -20,14 +20,13 @@ function Blogs() {
   const fetchBlogs = async () => {
     try {
       const res = await getAllBlogs();
-      setBlogs(res.data || []);
-    } catch (error)  {
+      setBlogs(res || []);
+    } catch (error) {
       console.error("Failed to fetch blogs", error);
       setBlogs([]);
     }
   };
 
-  // Opens the confirmation modal
   const handleDeleteClick = (id) => {
     setDeleteTargetId(id);
   };
@@ -35,18 +34,13 @@ function Blogs() {
   const handleConfirmDelete = async () => {
     try {
       await deleteBlog(deleteTargetId);
-
       setBlogs((prev) => prev.filter((b) => b._id !== deleteTargetId));
-
       setDeleteTargetId(null);
-    }catch (error) {
+    } catch (error) {
       console.error("Delete blog failed", error);
     }
   };
 
-
-
-  // Cancelled — close modal
   const handleCancelDelete = () => {
     setDeleteTargetId(null);
   };
@@ -57,7 +51,6 @@ function Blogs() {
 
   return (
     <div className="w-full">
-      {/* Delete Confirmation Modal */}
       {deleteTargetId !== null && (
         <DeleteModal
           onCancel={handleCancelDelete}
@@ -90,17 +83,18 @@ function Blogs() {
                 {blogs.map((item) => (
                   <tr key={item._id} className="border-t border-gray-300 hover:bg-gray-50 transition">
                     <td className="px-4 sm:px-6 py-4 flex gap-2 items-center border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">
-                      <img src={item.image || Img} className="w-8 h-8 rounded object-cover" alt="" />
+                      {/* ✅ FIX: thumbnail is images[0] */}
+                      <img src={item.images?.[0] || Img} className="w-8 h-8 rounded object-cover" alt="" />
                       {item.title}
                     </td>
-                    <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px]">{item.time}</td>
+                    <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px]">{item?.readingTime || ""}</td>
                     <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">{item.author}</td>
                     <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300">
                       <span className={`inline-block px-3 sm:px-2 py-1.5 sm:py-1 rounded-lg text-[#1E1E1E] text-xs sm:text-[12px] whitespace-nowrap ${item.status === "draft" ? "bg-[#FBE7E9]" : "bg-[#00B20733]"}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">{item.publishedOn}</td>
+                    <td className="px-4 sm:px-6 py-4 sm:py-5 border-r border-gray-300 text-sm sm:text-[14px] whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 sm:px-6 py-4 sm:py-5">
                       <div className="flex justify-center items-center gap-3 sm:gap-4">
                         <img
@@ -113,7 +107,7 @@ function Blogs() {
                           src={deleteIcon}
                           className="cursor-pointer hover:opacity-70 transition"
                           title="Delete"
-                          onClick={() => handleDeleteClick(item._idid)}
+                          onClick={() => handleDeleteClick(item._id)} // ✅ FIX: was item._idid (typo)
                         />
                       </div>
                     </td>

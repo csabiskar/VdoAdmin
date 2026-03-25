@@ -5,6 +5,7 @@ import API from "./axiosInstance";
 export const createBlog = async (data) => {
   try {
     const res = await API.post("/blogs", data);
+    
     return res.data;
   } catch (error) {
     console.error("Create Blog Error:", error);
@@ -17,7 +18,8 @@ export const createBlog = async (data) => {
 export const getAllBlogs = async () => {
   try {
     const res = await API.get("/blogs");
-    return res.data;
+    console.log(res.data.blogs)
+    return res.data.blogs;
   } catch (error) {
     console.error("Fetch Blogs Error:", error);
     throw error;
@@ -69,7 +71,7 @@ export const uploadBlogImage = async (file) => {
     // field name must match backend
     formData.append("image", file);
 
-    const res = await API.post("/blogs/image/upload", formData, {
+    const res = await API.post("products/image/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
