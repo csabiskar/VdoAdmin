@@ -49,3 +49,23 @@ export const getSingleProduct = async (id) => {
     throw error;
   }
 };
+
+export const editProduct = async (id,data) => {
+  try {
+    const res = await API.put(`/products/${id}`,data);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const deleteProduct = async (id) => {
+  try {
+    const res = await API.delete(`/products/${id}`);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

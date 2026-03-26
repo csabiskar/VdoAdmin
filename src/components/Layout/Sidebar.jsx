@@ -1,8 +1,4 @@
 import logo from "../../assets/logo.png";
-import { LuLayoutDashboard } from "react-icons/lu";
-import { MdOutlineCategory } from "react-icons/md";
-import { CiDiscount1 } from "react-icons/ci";
-import { BsLayoutTextWindowReverse } from "react-icons/bs";
 import { NavLink } from "react-router-dom";
 import productIcon from "../../assets/Dashboradicons/browse.svg";
 import categoryIcon from "../../assets/Dashboradicons/category.png";
@@ -81,9 +77,9 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto px-6 pb-6 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-300 rounded-full" />
-        <span className="text-sm font-medium">Abiskar</span>
+      <div className="mt-auto px-6 pb-6 flex items-center gap-10">
+        <img src={logo} alt="" className="w-15 h-15  rounded-full object-contain" />
+        <span className="text-sm font-medium">Admin</span>
       </div>
     </aside>
   );
