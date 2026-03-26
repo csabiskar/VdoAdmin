@@ -113,7 +113,7 @@ function Deals() {
           </div>
 
           <div className="flex gap-[60px] items-center">
-            <Button onClick={() => setCreatingDeal(true)}>Create New Deals</Button>
+            {/* <Button onClick={() => setCreatingDeal(true)}>Create New Deals</Button> */}
           </div>
         </div>
 

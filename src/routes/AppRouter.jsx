@@ -11,6 +11,7 @@ import UserBlogListing from "../pages/user-blogs/UserBlogListing";
 import UserBlogDetail from "../pages/user-blogs/UserBlogDetail";
 import Login from "../components/Login";
 import ProtectedRoute from "./ProtectedRoute";
+import EditProduct from "../pages/products/EditProduct";
 
 export const AppRouter = createBrowserRouter([
   {
@@ -30,6 +31,7 @@ export const AppRouter = createBrowserRouter([
       { path: "blogs/edit/:id", element: <CreateBlog /> },
       { path: "product", element: <ProductManager /> },
       { path: "orders", element: <Orders /> },
+      { path: "products/edit/:id", element: <EditProduct /> },
     ],
   },
   {

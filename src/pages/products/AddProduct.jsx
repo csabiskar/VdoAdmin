@@ -875,7 +875,7 @@ export default function AddProduct() {
               {/* Is Featured */}
               <div className="flex flex-col gap-[12px]">
                 <label className="text-[15px] text-[#023337] font-normal">
-                  Is Featured
+                  Featured Products
                 </label>
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2 cursor-pointer text-[15px] text-[#023337] font-light">
@@ -911,7 +911,7 @@ export default function AddProduct() {
               {/* Is Hot Deals */}
               <div className="flex flex-col gap-[12px]">
                 <label className="text-[15px] text-[#023337] font-normal">
-                  Is Hot Deals
+                   Hot Deals Products
                 </label>
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2 cursor-pointer text-[15px] text-[#023337] font-light">
