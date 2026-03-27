@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Button from "../../components/ui/Button";
-import editIcon from '../../assets/Dashboradicons/edit.svg'
-import deleteIcon from '../../assets/Dashboradicons/delete.svg'
+import editIcon from '../../assets/Dashboradicons/edit.svg';
+import deleteIcon from '../../assets/Dashboradicons/delete.svg';
 import DealEditModal from "../../components/ui/DealEditModal";
+import ModalCard from "../../components/ui/modelcard";
 import { getDeals, getFeaturedDeals, editDeals, editFeaturedDeals } from "../../api/deals.api";
+import toast, { Toaster } from "react-hot-toast";
 
 const priceTagKeys = ["Card - Large", "Card 1", "Card 2", "Card 3", "Card 4", "Card 5", "Card 6"];
 
@@ -26,6 +28,10 @@ function Deals() {
   const [hotDeals, setHotDeals] = useState([]);
   const [featuredDeals, setFeaturedDeals] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Delete confirm state
+  const [dealToDelete, setDealToDelete] = useState(null); // { item, index }
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const pillColors = {
     "Card - Large": "#FBE7E9",
@@ -65,18 +71,32 @@ function Deals() {
     }
   };
 
-  // ✅ Calls the correct PATCH API then removes from UI on success
-  const handleDelete = async (item, index) => {
+  // Opens the confirm modal — does NOT delete yet
+  const handleDeleteClick = (item, index) => {
+    setDealToDelete({ item, index });
+  };
+
+  // Called when user confirms deletion in the modal
+  const handleConfirmDelete = async () => {
+    if (!dealToDelete) return;
+    const { item, index } = dealToDelete;
+    setDeleteLoading(true);
     try {
       if (activeTab === "featured") {
         await editFeaturedDeals(item._id, { isFeatured: false });
         setFeaturedDeals((prev) => prev.filter((_, i) => i !== index));
+        toast.success(`"${item.product}" removed from Featured Products`);
       } else {
         await editDeals(item._id, { isHotDeals: false });
         setHotDeals((prev) => prev.filter((_, i) => i !== index));
+        toast.success(`"${item.product}" removed from Hot Deals`);
       }
+      setDealToDelete(null);
     } catch (err) {
       console.error("Failed to delete deal:", err);
+      toast.error("Failed to remove deal. Please try again.");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -84,6 +104,7 @@ function Deals() {
 
   return (
     <>
+      <Toaster />
       <div className="w-full pl-[20px]">
         <div className="flex justify-between items-center mb-8 max-w-300 mx-auto">
           <h1 className="text-[22px] font-semibold text-[#023337]">Deals</h1>
@@ -121,7 +142,6 @@ function Deals() {
           <div className="bg-white rounded-lg overflow-hidden border border-gray-300 shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                {/* HEADER */}
                 <thead className="bg-[#EAF8E7] [&_th]:font-medium text-[17.375px] text-[#222]">
                   <tr>
                     <th className="pl-[19.11px] py-[19.11px] w-48.5 whitespace-nowrap [border-right:1.043px_solid_#DBDBDB]">
@@ -148,19 +168,14 @@ function Deals() {
                   </tr>
                 </thead>
 
-                {/* BODY */}
                 <tbody className="text-[14px] font-medium text-[#222]">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-gray-400">
-                        Loading...
-                      </td>
+                      <td colSpan={7} className="text-center py-10 text-gray-400">Loading...</td>
                     </tr>
                   ) : displayedDeals.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-gray-400">
-                        No deals found
-                      </td>
+                      <td colSpan={7} className="text-center py-10 text-gray-400">No deals found</td>
                     </tr>
                   ) : (
                     displayedDeals.map((item, index) => (
@@ -197,7 +212,7 @@ function Deals() {
                               src={deleteIcon}
                               className="text-lg sm:text-xl text-gray-600 cursor-pointer hover:text-red-600 transition"
                               title="Delete"
-                              onClick={() => handleDelete(item, index)} // ✅ passes item (for _id) and index (for UI removal)
+                              onClick={() => handleDeleteClick(item, index)}
                             />
                           </div>
                         </td>
@@ -210,6 +225,42 @@ function Deals() {
           </div>
         </div>
       </div>
+
+      {/* ── Delete Confirm Modal ── */}
+      {dealToDelete && (
+        <ModalCard
+          title={`Remove from ${activeTab === "featured" ? "Featured Products" : "Hot Deals"}`}
+          onCancel={() => setDealToDelete(null)}
+          onSave={handleConfirmDelete}
+          cancelLabel="Cancel"
+          saveLabel={deleteLoading ? "Removing..." : "Remove"}
+        >
+          <div className="space-y-4">
+            {/* Deal preview row */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-[#E5E7EB]">
+              <div>
+                <p className="text-sm font-medium text-[#023337]">{dealToDelete.item.product}</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {dealToDelete.item.discountPercent} off &nbsp;·&nbsp; {dealToDelete.item.actual} → {dealToDelete.item.discount}
+                </p>
+              </div>
+              <span
+                className="inline-block rounded-lg text-[11px] font-medium text-[#222] px-2.5 py-1"
+                style={{ background: pillColors[dealToDelete.item.priceTag] || "#F3F4F6" }}
+              >
+                {dealToDelete.item.priceTag}
+              </span>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              Are you sure you want to remove{" "}
+              <span className="font-semibold text-[#023337]">"{dealToDelete.item.product}"</span>{" "}
+              from {activeTab === "featured" ? "Featured Products" : "Hot Deals"}?
+              This action cannot be undone.
+            </p>
+          </div>
+        </ModalCard>
+      )}
 
       {/* Edit Modal */}
       {editingDeal && (
