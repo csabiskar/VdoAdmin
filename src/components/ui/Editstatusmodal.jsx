@@ -31,7 +31,7 @@ export default function EditStatusModal({ orderId = "#59217", currentStatus = "O
         minHeight: "424px",
         backgroundColor: "#FFFFFF",
         borderRadius: "16px",
-        border: "2px solid #60C8FF",
+        border: "0.5px solid #00B207",
         padding: "36px 32px 36px",
         boxSizing: "border-box",
         display: "flex",
