@@ -1,4 +1,3 @@
-
 const sampleOrderDetails = {
   paymentMethod: "UPI",
   subtotal: 429,
@@ -6,7 +5,8 @@ const sampleOrderDetails = {
   shipping: 0,
   total: 336,
   customer: {
-    address: "2/17 SR Avenue, Kumudam nagar,\nVilankurichi road, Coimbatore - 641 045",
+    address:
+      "2/17 SR Avenue, Kumudam nagar,\nVilankurichi road, Coimbatore - 641 045",
     email: "Sampath@gmail.com",
     phone: "+91 94436 76489",
   },
@@ -17,7 +17,8 @@ const sampleOrderDetails = {
       price: 122,
       quantity: 2,
       subtotal: 244,
-      image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=80&h=80&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=80&h=80&fit=crop",
     },
     {
       id: 2,
@@ -25,7 +26,8 @@ const sampleOrderDetails = {
       price: 53,
       quantity: 1,
       subtotal: 53,
-      image: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=80&h=80&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=80&h=80&fit=crop",
     },
     {
       id: 3,
@@ -33,7 +35,8 @@ const sampleOrderDetails = {
       price: 132,
       quantity: 1,
       subtotal: 132,
-      image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=80&h=80&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=80&h=80&fit=crop",
     },
   ],
 };
@@ -51,6 +54,8 @@ export default function OrderModal({ order, onClose }) {
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  console.log(order, "kkdsd");
 
   return (
     <div
@@ -75,7 +80,8 @@ export default function OrderModal({ order, onClose }) {
           maxHeight: "92vh",
           overflowY: "auto",
           position: "relative",
-          boxShadow: "0 20px 60px rgba(10,20,60,0.15), 0 2px 8px rgba(10,20,60,0.08)",
+          boxShadow:
+            "0 20px 60px rgba(10,20,60,0.15), 0 2px 8px rgba(10,20,60,0.08)",
           padding: "40px 40px 32px",
         }}
       >
@@ -138,7 +144,7 @@ export default function OrderModal({ order, onClose }) {
                 letterSpacing: -0.3,
               }}
             >
-              {details.customer.name}
+              {order.customerName}
             </p>
 
             <p
@@ -150,7 +156,11 @@ export default function OrderModal({ order, onClose }) {
                 margin: "0 0 24px 0",
               }}
             >
-              {details.customer.address}
+              <span>{order.raw.shippingAddress.streetAddress},</span>
+              <span className="pl-1">
+                {order.raw.shippingAddress.state} -{" "}
+                {order.raw.shippingAddress.zipCode}
+              </span>
             </p>
 
             <div style={{ marginBottom: 14 }}>
@@ -166,8 +176,15 @@ export default function OrderModal({ order, onClose }) {
               >
                 Email
               </p>
-              <p style={{ fontSize: 14, color: "#111827", fontWeight: 500, margin: 0 }}>
-                {details.customer.email}
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "#111827",
+                  fontWeight: 500,
+                  margin: 0,
+                }}
+              >
+                {order.raw.shippingAddress.email}
               </p>
             </div>
 
@@ -184,8 +201,15 @@ export default function OrderModal({ order, onClose }) {
               >
                 Phone
               </p>
-              <p style={{ fontSize: 14, color: "#111827", fontWeight: 500, margin: 0 }}>
-                {details.customer.phone}
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "#111827",
+                  fontWeight: 500,
+                  margin: 0,
+                }}
+              >
+                +91 {order.raw.shippingAddress.phone}
               </p>
             </div>
           </div>
@@ -243,7 +267,7 @@ export default function OrderModal({ order, onClose }) {
                       margin: 0,
                     }}
                   >
-                    {details.orderId}
+                    #{order.raw.orderId.slice(-6).toUpperCase()}
                   </p>
                 </div>
                 <div style={{ padding: "16px 20px" }}>
@@ -274,11 +298,16 @@ export default function OrderModal({ order, onClose }) {
 
               {/* Subtotal / Discount / Shipping */}
               {[
-                { label: "Subtotal:", value: `₹${details.subtotal}.00`, bold: false },
-                { label: "Discount",  value: `${details.discountPercent}%`, bold: false },
+                {
+                  label: "Subtotal:",
+                  value: `₹${order.raw.totalAmount}.00`,
+                  bold: false,
+                },
+
                 {
                   label: "Shipping",
-                  value: details.shipping === 0 ? "Free" : `₹${details.shipping}.00`,
+                  value:
+                    details.shipping === 0 ? "Free" : `₹${details.shipping}.00`,
                   bold: false,
                 },
               ].map(({ label, value }) => (
@@ -292,8 +321,14 @@ export default function OrderModal({ order, onClose }) {
                     borderBottom: "1px solid #f0f3f7",
                   }}
                 >
-                  <span style={{ fontSize: 14, color: "#6b7280" }}>{label}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>{value}</span>
+                  <span style={{ fontSize: 14, color: "#6b7280" }}>
+                    {label}
+                  </span>
+                  <span
+                    style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}
+                  >
+                    {value}
+                  </span>
                 </div>
               ))}
 
@@ -306,9 +341,15 @@ export default function OrderModal({ order, onClose }) {
                   padding: "16px 20px",
                 }}
               >
-                <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>Total</span>
-                <span style={{ fontSize: 20, fontWeight: 800, color: "#16a34a" }}>
-                  ₹{details.total}.00
+                <span
+                  style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}
+                >
+                  Total
+                </span>
+                <span
+                  style={{ fontSize: 20, fontWeight: 800, color: "#16a34a" }}
+                >
+                  ₹{order.raw.totalAmount}.00
                 </span>
               </div>
             </div>
@@ -334,8 +375,8 @@ export default function OrderModal({ order, onClose }) {
             }}
           >
             {[
-              { label: "Product",  align: "left" },
-              { label: "Price",    align: "center" },
+              { label: "Product", align: "left" },
+              { label: "Price", align: "center" },
               { label: "Quantity", align: "center" },
               { label: "Subtotal", align: "center" },
             ].map(({ label, align }) => (
@@ -356,91 +397,107 @@ export default function OrderModal({ order, onClose }) {
             ))}
           </div>
 
+          {console.log(order?.raw?.items, "lll")}
           {/* Product rows */}
-          {details.products.map((p, i) => (
-            <div
-              key={p.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 140px 160px 160px",
-                padding: "14px 20px",
-                alignItems: "center",
-                borderBottom:
-                  i < details.products.length - 1 ? "1px solid #f0f3f7" : "none",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#fafbfc")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-            >
-              {/* Product name + image */}
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div
+          {order?.raw?.items.length &&
+            order?.raw?.items.map((p, i) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 140px 160px 160px",
+                  padding: "14px 20px",
+                  alignItems: "center",
+                  borderBottom:
+                    i < details.products.length - 1
+                      ? "1px solid #f0f3f7"
+                      : "none",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#fafbfc")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                {/* Product name + image */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      overflow: "hidden",
+                      border: "1px solid #e5e9f0",
+                      flexShrink: 0,
+                      background: "#f8fafc",
+                    }}
+                  >
+                    <img
+                      src={p.productImages[1]}
+                      alt={p.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.parentElement.innerHTML = "🛒";
+                        e.currentTarget.parentElement.style.fontSize = "22px";
+                        e.currentTarget.parentElement.style.display = "flex";
+                        e.currentTarget.parentElement.style.alignItems =
+                          "center";
+                        e.currentTarget.parentElement.style.justifyContent =
+                          "center";
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{ fontSize: 14, fontWeight: 500, color: "#1f2937" }}
+                  >
+                    {p.productName}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <p
                   style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    border: "1px solid #e5e9f0",
-                    flexShrink: 0,
-                    background: "#f8fafc",
+                    fontSize: 14,
+                    color: "#374151",
+                    textAlign: "center",
+                    margin: 0,
                   }}
                 >
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      e.currentTarget.parentElement.innerHTML = "🛒";
-                      e.currentTarget.parentElement.style.fontSize = "22px";
-                      e.currentTarget.parentElement.style.display = "flex";
-                      e.currentTarget.parentElement.style.alignItems = "center";
-                      e.currentTarget.parentElement.style.justifyContent = "center";
-                    }}
-                  />
-                </div>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "#1f2937" }}>
-                  {p.name}
-                </span>
+                  ₹{p.discountPrice ? p.discountPrice : p.price}.00
+                </p>
+
+                {/* Quantity */}
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: "#374151",
+                    textAlign: "center",
+                    margin: 0,
+                  }}
+                >
+                  x{p.quantity}
+                </p>
+
+                {/* Subtotal */}
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: "#374151",
+                    textAlign: "center",
+                    margin: 0,
+                  }}
+                >
+                  ₹{p.subTotal}.00
+                </p>
               </div>
-
-              {/* Price */}
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "#374151",
-                  textAlign: "center",
-                  margin: 0,
-                }}
-              >
-                ₹{p.price}.00
-              </p>
-
-              {/* Quantity */}
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "#374151",
-                  textAlign: "center",
-                  margin: 0,
-                }}
-              >
-                x{p.quantity}
-              </p>
-
-              {/* Subtotal */}
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "#374151",
-                  textAlign: "center",
-                  margin: 0,
-                }}
-              >
-                ₹{p.subtotal}.00
-              </p>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
